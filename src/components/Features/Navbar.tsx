@@ -1,26 +1,29 @@
+import { forwardRef } from 'react'
 import { Link } from 'react-router-dom'
 import ThemeToggler from '../Utilities/ThemeToggler'
+import { motion, AnimationControls, TargetAndTransition, VariantLabels } from 'framer-motion'
 
-export default function Navbar() {
+type NavbarProps = {
+  animate?: boolean | AnimationControls | TargetAndTransition | VariantLabels | undefined
+}
+
+export default forwardRef<HTMLDivElement, NavbarProps>(function Navbar(props, ref) {
   return (
-    <nav className='sticky top-0 w-full text-text bg-background border-b-2 border-[#808080] z-[100] px-8 py-4 flex items-center'>
+    <motion.nav ref={ref} animate={props.animate} className='sticky top-0 w-full text-text bg-background border-b-2 border-[#808080] z-[100] px-8 py-4 flex items-center'>
       <Link to='/' className='font-source-serif text-4xl font-bold'>
         eazzyBizz
       </Link>
       <ThemeToggler className='ml-auto' />
       <SignInBtn />
-    </nav>
+    </motion.nav>
   )
-}
+})
 
 function SignInBtn() {
-  const signInFn = () => {
-    console.log('Hello everybody')
-  }
   return (
-    <button
+    <Link
+      to='/signin'
       className="relative border-none p-[2px] rounded-full ml-4 sm:ml-8 lg:ml-16 sm:mr-[2%] cursor-pointer transition-all duration-300 shadow-[2px_2px_10px_rgba(0,_0,_0,_0.199)] bg-gradient-to-r from-cyan-500 to-blue-500 outline-0 group/signin active:scale-90 after:absolute after:inset-[2px] after:z-10 hover:after:scale-[0.4] hover:after:opacity-0 after:transition-all after:duration-300 after:rounded-full after:bg-background"
-      onClick={ signInFn }
     >
       <div className='relative z-20 flex items-center py-2 px-6 gap-4 bg-transparent rounded-full transition-all duration-300'>
         <div className="w-full duration-300 flex items-center justify-center">
@@ -30,6 +33,6 @@ function SignInBtn() {
         </div>
         <div className="text-text group-hover/signin:text-white text-[1.2em] font-[600] duration-300">Login</div>
       </div>
-    </button>
+    </Link>
   )
 }

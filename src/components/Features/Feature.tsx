@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'
 import details from './FeatureDetails'
+import GoToTop from '../Utilities/GoToTop'
 
 export default function Feature() {
   const params = useParams<{ featureID: string }>()
@@ -9,7 +10,22 @@ export default function Feature() {
     if (detail !== undefined) document.title = `${detail.title} | eazzyBizz`
     else throw new Error("Feature not found")
   }, [])
+
+  const [scrolled, setScrolled] = useState(false)
+  const handleScroll = () => {
+    const scrollThreshold = window.innerHeight * 0.15; // 15% of viewport height
+    if (window.scrollY > scrollThreshold) {
+      setScrolled(true);
+    } else {
+      setScrolled(false);
+    }
+  }
+  window.onscroll = handleScroll
+  
   return (
-    <detail.sectionComponent />
+    <>
+      <detail.sectionComponent />
+      <GoToTop scrolled={scrolled} />
+    </>
   )
 }

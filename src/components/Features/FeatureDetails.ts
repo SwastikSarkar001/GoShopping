@@ -1,5 +1,5 @@
-import ChatApp from "./Feature Sections/ChatApp";
-import Dummy from "./Feature Sections/Dummy"
+import ChatApp from "./Feature Sections/eazzyChat/ChatApp"
+import UpcomingFeatures from "./Feature Sections/UpcomingFeatures"
 
 /**
  * Represents the details of a feature in the shopping website.
@@ -49,7 +49,7 @@ type FeatureDetail = {
 }
 
 const details: FeatureDetail[] = [{
-    featureID: 'eazzyChat',
+    featureID: 'eazzy-chat',
     title: 'eazzyChat',
     description: 'Enables real-time text and media communication between users.',
     sectionComponent: ChatApp,
@@ -60,7 +60,7 @@ const details: FeatureDetail[] = [{
     featureID: "eazzy-crm",
     title: "eazzyCRM",
     description: "Track and manage customer interactions and data throughout the customer lifecycle.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
@@ -68,7 +68,7 @@ const details: FeatureDetail[] = [{
     featureID: "eazzy-hr",
     title: "eazzyHR",
     description: "Manage employee records, payroll, and benefits.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
@@ -76,7 +76,7 @@ const details: FeatureDetail[] = [{
     featureID: "eazzy-books",
     title: "eazzyBooks",
     description: "Automate and streamline your order processing workflow.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
@@ -84,7 +84,7 @@ const details: FeatureDetail[] = [{
     featureID: "eazzy-manufacturing",
     title: "eazzyManufacturing",
     description: "Plan, execute, and monitor projects efficiently.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
@@ -92,7 +92,7 @@ const details: FeatureDetail[] = [{
     featureID: "inventory-management",
     title: "Inventory Management",
     description: "Manage your stock levels, orders, and suppliers efficiently.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
@@ -100,7 +100,7 @@ const details: FeatureDetail[] = [{
     featureID: "sales-analytics",
     title: "Sales Analytics",
     description: "Analyze sales data to make informed business decisions.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
@@ -108,7 +108,7 @@ const details: FeatureDetail[] = [{
     featureID: "financial-management",
     title: "Financial Management",
     description: "Manage your financial operations, including accounting, invoicing, and budgeting.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
@@ -116,7 +116,7 @@ const details: FeatureDetail[] = [{
     featureID: "supply-chain-management",
     title: "Supply Chain Management",
     description: "Optimize your supply chain operations from procurement to delivery.",
-    sectionComponent: Dummy,
+    sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
     price_yearly: 12*70,
     price_enterprise: 999
