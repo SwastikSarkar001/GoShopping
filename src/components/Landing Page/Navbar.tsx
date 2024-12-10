@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, createRef, useState, useMemo } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import { navbar } from '../../types'
 import sectionsInfo from './sectiondata'
@@ -21,16 +21,20 @@ export default function Navbar(props: navbar) {
 	
 	/* For filling background */
 	const controls = useAnimation();
+	const initial = { borderBottomWidth: '0px', backgroundImage: 'linear-gradient(#030711ff, #03071100 75%)' }
 	useEffect(() => {
 		controls.start({
 			borderBottomWidth: (props.scrolled || optionsClicked) ? '2px' : '0px',
-			backgroundImage: (theme === 'dark') ? (props.scrolled || optionsClicked) ? 'linear-gradient(#030711ff, #030711ff 75%)' : 'linear-gradient(#030711ff, #03071100 75%)' : (props.scrolled || optionsClicked) ? 'linear-gradient(#fcf8eeff, #fcf8eeff, 75%)' : 'linear-gradient(#030711ff, #03071100, 75%)',
+			backgroundImage: `linear-gradient(${theme === 'dark' ? '#030711ff' : optionsClicked ? '#fcf8eeff' : props.scrolled ? '#fcf8eeff' : '#030711ff'}, ${theme === 'dark' ? optionsClicked ? '#030711ff' : props.scrolled ? '#030711ff' : '#03071100' : optionsClicked ? '#fcf8eeff' : props.scrolled ? '#fcf8eeff' : '#03071100'} 75%)`,
 			transition: { duration: 0.2 },
 		});
 	}, [props.scrolled, optionsClicked, controls, theme])
 
 	/* Scroll to the element */
-	const largeScreenRefs: React.RefObject<HTMLDivElement>[] = Array.from({ length: sectionsInfo.length }, () => useRef<HTMLDivElement>(null))
+	const largeScreenRefs = useMemo(
+    () => sectionsInfo.map(() => createRef<HTMLDivElement>()),
+    []
+  );
 	useEffect(() => {
 		largeScreenRefs.forEach((ref, index) => {
 			if (ref.current != null) {
@@ -44,7 +48,7 @@ export default function Navbar(props: navbar) {
 	})
 
 	return (
-		<motion.nav id='navbar' animate={controls} className={`flex transition-colors items-center justify-between fixed z-[100] top-0 left-0 right-0 ${(props.scrolled || optionsClicked) ? 'text-text' : 'text-white'} px-8 py-4 select-none border-[#808080]`}>
+		<motion.nav id='navbar' animate={controls} initial={initial} className={`flex transition-colors items-center justify-between fixed z-[100] top-0 left-0 right-0 ${(props.scrolled || optionsClicked) ? 'text-text' : 'text-white'} px-8 py-4 select-none border-[#808080]`}>
 			<div className='hover:scale-110 active:scale-90 transition-transform'>
 				<Link to='/' className='font-source-serif text-4xl font-bold'>
 					eazzyBizz
@@ -123,7 +127,10 @@ type msopts = {
 
 function MediumScreenOpts(props: msopts) {
 	const { theme, toggleTheme } = useTheme()
-	const mediumScreenRefs: React.RefObject<HTMLDivElement>[] = Array.from({ length: sectionsInfo.length }, () => useRef<HTMLDivElement>(null))
+	const mediumScreenRefs = useMemo(
+    () => sectionsInfo.map(() => createRef<HTMLDivElement>()),
+    []
+  );
 
 	mediumScreenRefs.forEach((ref, index) => {
 		if (ref.current != null) {

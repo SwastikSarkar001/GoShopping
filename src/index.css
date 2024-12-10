@@ -24,6 +24,16 @@
     body {
         @apply bg-[rgb(var(--background))] transition-colors;
     }
+    input {
+        /* prevent anything that tries to change this from ever getting there */
+        transition:
+          color calc(infinity * 1s) step-end,
+          background-color calc(infinity * 1s) step-end;
+      
+        /* style the field as normal */
+        background-color: transparent;
+        color: CanvasText;
+      }
 }
 
 @layer components {

@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom'
 import SignInForm from "./SignInForm"
 import SignUpForm from "./SignUpForm"
 
-export default function SignInPage() {
+export default function AuthenticationPage() {
+  // const user = useAuth()
+  // const navigate = useNavigate()
+  // useEffect(() => {
+  //   if (user !== null) navigate('/dashboard', { replace: true })
+  // }, [user])
+
   const [openSignUp, setOpenSignUp] = useState(false)  // false -> Sign In ,  true -> Sign Up
   const toggleSignUp = () => {
     setOpenSignUp(prev => !prev)
