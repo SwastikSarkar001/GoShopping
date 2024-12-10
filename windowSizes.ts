@@ -1,5 +1,10 @@
 import { windowSizesType } from './src/types'
 
+export const xlarge: windowSizesType = {
+  value: 1440,
+  valInPx: '1440px'
+}
+
 export const large: windowSizesType = {
   value: 1024,
   valInPx: '1024px'

@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import { small, medium, large } from './windowSizes'
+import { small, medium, large, xlarge } from './windowSizes'
 
 export default {
   content: [
@@ -10,7 +10,8 @@ export default {
     screens: {
       sm: small.valInPx,
       md: medium.valInPx,
-      lg: large.valInPx
+      lg: large.valInPx,
+      xl: xlarge.valInPx
     },
     extend: {
       fontFamily: {

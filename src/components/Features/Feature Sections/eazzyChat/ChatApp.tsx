@@ -4,6 +4,7 @@ import Navbar from "../../Navbar"
 import HeroSection from "./HeroSection"
 import AppFeatures from "./AppFeatures"
 import FAQs from "./FAQs"
+// import CTA from "./CTA"
 import Footer from "../../../Utilities/Footer"
 import { useAnimation } from "framer-motion";
 import useTheme from "../../../../contexts/useTheme";
@@ -41,6 +42,7 @@ export default function ChatApp() {
       <HeroSection />
       <AppFeatures />
       <FAQs />
+      {/* <CTA /> */}
       <Footer />
     </main>
   )
