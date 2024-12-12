@@ -23,24 +23,36 @@ export default function AuthenticationPage() {
         <div id='sign-in-form' className={`bg-white form-container absolute size-full md:w-[60%] transition-all duration-[600ms] z-20 ${openSignUp ? 'left-[40%] opacity-0' : 'left-0 opacity-100'}`}>
           <SignInForm />
         </div>
-        <div className={`hidden md:block text-white overlay-container absolute top-0 w-[40%] h-full bg-black overflow-hidden transition-all duration-[600ms] z-30 ${openSignUp ? 'left-0' : 'left-[60%]'}`}>
+        <div className={`hidden md:block text-white overlay-container absolute top-0 w-[40%] h-full bg-gradient-to-tr from-blue-500 to-indigo-600 overflow-hidden transition-all duration-[600ms] z-30 ${openSignUp ? 'left-0' : 'left-[60%]'}`}>
           <div id='toggle-to-sign-in' className={`absolute gap-4 w-full flex items-center justify-center flex-col py-0 px-[40px] text-center h-full transform-all duration-[600ms] ${openSignUp ? 'left-0 opacity-100 pointer-events-auto' : 'left-full opacity-0 pointer-events-none'}`}>
             <Link to='/' className='font-source-serif text-4xl font-bold'>
               eazzyBizz
             </Link>
             <div>
-              Description
+              Registered already? Click below to sign in.
             </div>
-            <button onClick={ toggleSignUp }>Sign In</button>
+            <button
+              onClick={ toggleSignUp }
+              className="rounded-lg px-4 py-2 border-2 font-semibold"
+            >
+              
+              Sign In
+            </button>
           </div>
           <div id='toggle-to-sign-up' className={`absolute gap-4 w-full flex items-center justify-center flex-col py-0 px-[40px] text-center h-full transform-all duration-[600ms] ${openSignUp ? '-left-full opacity-0 pointer-events-none' : 'left-0 opacity-100 pointer-events-auto'}`}>
             <Link to='/' className='font-source-serif text-4xl font-bold'>
               eazzyBizz
             </Link>
             <div>
-              Already signed in to your account?
+              New to eazzyBizz? Click below to get started!
             </div>
-            <button onClick={ toggleSignUp }>Sign Up</button>
+            <button
+              onClick={ toggleSignUp }
+              className="rounded-lg px-4 py-2 border-2 font-semibold"
+            >
+              
+              Sign Up
+            </button>
           </div>
         </div>
       </div>

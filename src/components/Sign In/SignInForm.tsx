@@ -14,7 +14,7 @@ export default function SignInForm() {
         eazzyBizz
       </Link>
       <div className='text-center'>
-        <div className='mt-2 capitalize font-roboto-flex text-3xl font-bold'>Sign in</div>
+        <div className='mt-2 capitalize text-3xl font-bold font-source-serif'>Sign in</div>
       </div>
       <div className="relative flex items-center w-4/5 border-b-2 has-[>input[value='']]:border-green-400 has-[>input:focus]:border-cyan-400 has-[>input:invalid]:border-orange-400 has-[>input:not(:placeholder-shown)]:border-cyan-400 has-[>input:invalid:not(:placeholder-shown)]:border-orange-400">
         <label
@@ -31,7 +31,7 @@ export default function SignInForm() {
           name="username"
           id="username"
           placeholder="Enter your username"
-          className="w-full focus:outline-none pl-3 pr-2 py-1 bg-transparent  placeholder:text-transparent"
+          className="w-full focus:outline-none pl-3 pr-2 py-1 bg-transparent placeholder:text-transparent"
           required
         />
       </div>
