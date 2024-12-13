@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavbarHeightContext } from './useNavbarHeight';
+import { NavbarHeightContext } from '../hooks/useNavbarHeight';
 
 type providerType = {
   children: React.ReactNode

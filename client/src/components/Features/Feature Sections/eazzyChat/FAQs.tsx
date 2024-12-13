@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import useTheme from '../../../../contexts/useTheme'
+import useTheme from '../../../../hooks/useTheme'
 
 const qna = [{
     question: 'What is eazzyChat?',

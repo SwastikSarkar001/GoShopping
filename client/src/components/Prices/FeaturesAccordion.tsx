@@ -1,6 +1,6 @@
 import { useState } from "react"
 import details from "../Features/FeatureDetails"
-import useTheme from "../../contexts/useTheme"
+import useTheme from "../../hooks/useTheme"
 
 type FeaturesAccordionProps = {
   checkedFeatures: { [key: string]: boolean }

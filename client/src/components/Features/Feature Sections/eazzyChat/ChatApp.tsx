@@ -7,7 +7,7 @@ import FAQs from "./FAQs"
 import CTA from "./CTA"
 import Footer from "../../../Utilities/Footer"
 import { useAnimation } from "framer-motion";
-import useTheme from "../../../../contexts/useTheme";
+import useTheme from "../../../../hooks/useTheme";
 // import { useNavigate } from 'react-router-dom'
 
 export default function ChatApp() {

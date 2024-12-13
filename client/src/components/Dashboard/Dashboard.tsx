@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import useAuth from '../../contexts/useAuth'
+import useAuth from '../../hooks/Auth'
 
 export default function Dashboard() {
   const user = useAuth()

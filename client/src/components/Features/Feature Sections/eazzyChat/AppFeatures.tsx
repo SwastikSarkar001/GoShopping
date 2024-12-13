@@ -1,4 +1,4 @@
-import useTheme from "../../../../contexts/useTheme"
+import useTheme from "../../../../hooks/useTheme"
 import { IoShieldHalfSharp } from "react-icons/io5"
 import { IoChatbubbleEllipses } from "react-icons/io5"
 import { FcOpenedFolder } from "react-icons/fc";

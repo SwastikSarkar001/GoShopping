@@ -1,5 +1,5 @@
 import { useRef, useEffect, HTMLProps } from 'react'
-import useTheme from '../../contexts/useTheme'
+import useTheme from '../../hooks/useTheme'
 
 type togglerProps = {
 	className?: HTMLProps<HTMLElement>['className']

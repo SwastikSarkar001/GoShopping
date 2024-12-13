@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { AuthContext } from './useAuth'
+import { AuthContext } from '../hooks/Auth'
 import { User } from '../types';
 
 type AuthProviderProps = {} & React.PropsWithChildren

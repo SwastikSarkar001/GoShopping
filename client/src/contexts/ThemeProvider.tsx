@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { themeValues } from '../types'
-import { ThemeContext } from './useTheme'
+import { ThemeContext } from '../hooks/useTheme'
 
 type providerType = {
   children: React.ReactNode

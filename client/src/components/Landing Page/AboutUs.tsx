@@ -1,5 +1,5 @@
 import AboutLanding from "./logos/AboutLanding"
-import useNavbarHeight from '../../contexts/useNavbarHeight'
+import useNavbarHeight from '../../hooks/useNavbarHeight'
 import { forwardRef, useEffect, useRef, useState } from "react"
 import { motion, useScroll, useSpring } from "framer-motion"
 import { emptyProps, messagesType, messageType } from "../../types"

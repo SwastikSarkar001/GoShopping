@@ -4,7 +4,7 @@ import { navbar } from '../../types'
 import sectionsInfo from './sectiondata'
 import { large } from '../../../windowSizes'
 import ThemeToggler from '../Utilities/ThemeToggler'
-import useTheme from '../../contexts/useTheme'
+import useTheme from '../../hooks/useTheme'
 import { Link } from 'react-router-dom'
 import { RxOpenInNewWindow } from "react-icons/rx";
 

@@ -27,18 +27,22 @@ const useAuth = (): User => {
   else throw new AuthContextError('useAuth must be used within an AuthProvider');
 }
 
+// export const useSignIn = () => {
+//   const handleSignIn = () => {
+//     // const history = useHistory();
+
+//     const signIn = () => {
+//       // Example: Store user data in localStorage (adjust based on your app's login logic)
+//       localStorage.setItem('user', JSON.stringify({ username: 'user' }));
+//       // history.push('/dashboard'); // Redirect to dashboard after signing in
+//     };
+//   };
+
+//   return handleSignIn;
+// };
+
 export const useSignIn = () => {
-  const handleSignIn = () => {
-    // const history = useHistory();
-
-    const signIn = () => {
-      // Example: Store user data in localStorage (adjust based on your app's login logic)
-      localStorage.setItem('user', JSON.stringify({ username: 'user' }));
-      // history.push('/dashboard'); // Redirect to dashboard after signing in
-    };
-  };
-
-  return handleSignIn;
-};
+  
+}
 
 export default useAuth
