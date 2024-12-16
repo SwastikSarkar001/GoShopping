@@ -11,9 +11,6 @@ import useTheme from "../../../../hooks/useTheme";
 // import { useNavigate } from 'react-router-dom'
 
 export default function ChatApp() {
-  // useEffect(() => {
-  //   window.location.href = 'https://www.google.com/'
-  // })
   const [scrolled, setScrolled] = useState(false)
   const handleScroll = () => {
     const scrollThreshold = window.innerHeight * 0.15; // 15% of viewport height

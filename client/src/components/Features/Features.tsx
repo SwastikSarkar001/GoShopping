@@ -58,7 +58,7 @@ export default function FeaturesList() {
           value={searchValue}
           onChange={searchHandler}
           placeholder="What feature are you looking for?"
-          className="py-2 px-4 md:py-4 md:px-8 w-4/5 md:w-3/5 border border-gray-300 rounded-full"
+          className="py-2 px-4 md:py-4 md:px-8 w-4/5 md:w-3/5 border text-text border-gray-300 rounded-full"
         />
       </div>
       {
