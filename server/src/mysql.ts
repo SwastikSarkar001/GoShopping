@@ -1,9 +1,9 @@
 /// <reference path="./types.d.ts" />
 
 import mysql from 'mysql2/promise'
-import dotenv from 'dotenv'
+import query from './db.js'
 import { User } from './types.js'
-dotenv.config({path: '.env.local'})
+
 
 type resultsInfoType = {
   status: number,
@@ -20,37 +20,36 @@ async function createConnection() {
 }
 
 export async function addUser(userdata: User) {
-  const success = false
-  const connection = await createConnection()
-  connection.connect()
-  .then(() => {
-    const columns = Object.keys(userdata).join(', ')
-    const values = Object.values(userdata).join(', ')
-    connection.query(`insert into table users(${columns}) values(${values})`)
-    .then((res) => {
-      console.log(res)
-    })
-    .catch((err) => {
-      console.error(err)
-    })
-  })
-  .catch((err) => console.error(err))
-  .finally(() => connection.destroy())
-}
-
-export async function getUsers() {
-  const connection = await createConnection()
   const resultsinfo: resultsInfoType = {status: 100}
   try {
-    const [results] = await connection.query(`select username, firstname, middlename, lastname, email, phone, city, state, country from users`)
-    connection.destroy()
+    const columns = Object.keys(userdata).join(', ')
+    // const values = Object.values(userdata).map(data => `'${data}'`).join(', ')
+    const values = Object.values(userdata).join(', ')
+    const [results] = await query(`insert into users(${columns}) values(${values})`)
     resultsinfo.status = 200
     resultsinfo.result = results
   }
   catch (err) {
     console.error(err)
-    connection.destroy()
     resultsinfo.status = 404
   }
-  return resultsinfo
+  finally {
+    return resultsinfo
+  }
+}
+
+export async function getUsers() {
+  const resultsinfo: resultsInfoType = {status: 100}
+  try {
+    const [results] = await query(`select username, firstname, middlename, lastname, email, phone, city, state, country from users`)
+    resultsinfo.status = 200
+    resultsinfo.result = results
+  }
+  catch (err) {
+    console.error(err)
+    resultsinfo.status = 404
+  }
+  finally {
+    return resultsinfo
+  }
 }
