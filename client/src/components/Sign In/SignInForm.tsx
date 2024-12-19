@@ -36,8 +36,6 @@ export default function SignInForm() {
         />
       </div>
       
-
-
       <button onClick={sampleFn} className="px-6 py-2 *:font-source-serif border-2 rounded-full shadow-md flex gap-4 items-center">
         <div>
           <svg viewBox="0 0 512 512" className='w-[1em]'>

@@ -1,12 +1,12 @@
 import mysql from 'mysql2/promise'
-import 'config.js'
+import { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } from 'constants/env';
 
 // Create a connection pool to be used throughout the app
 const pool = mysql.createPool({
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
+  host: MYSQL_HOST,
+  user: MYSQL_USER,
+  password: MYSQL_PASSWORD,
+  database: MYSQL_DATABASE,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
