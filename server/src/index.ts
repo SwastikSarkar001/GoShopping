@@ -1,19 +1,24 @@
 import express from 'express'
 import cors from 'cors'
-import bodyParser from 'body-parser'
+// import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import { hash, genSalt } from 'bcryptjs'
 import { addUser, getUsers } from './mysql'
 import { User } from './types'
-import { PORT } from 'constants/env'
+import { APP_URL, PORT } from 'constants/env'
 
 const app = express()
-app.use(cors())
+app.use(express.urlencoded({ extended: true }))
+app.use(cors({
+  origin: APP_URL,
+  credentials: true
+}))
 app.use(express.json())
 app.use(cookieParser())
 
-app.post('/api/add_user', (req, res) => {
-  addUser(req.body as User)
+app.post('/api/add_user', async (req, res) => {
+  const response = await addUser(req.body as User)
+  res.status(response.status)
+  res.send(response.message)  
 })
 
 app.get('/api/users', async (req, res) => {

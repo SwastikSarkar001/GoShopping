@@ -21,3 +21,4 @@ export const MYSQL_HOST = getEnv('MYSQL_HOST');
 export const MYSQL_USER = getEnv('MYSQL_USER')
 export const MYSQL_PASSWORD = getEnv('MYSQL_PASSWORD')
 export const MYSQL_DATABASE = getEnv('MYSQL_DATABASE')
+export const APP_URL = getEnv('APP_URL')

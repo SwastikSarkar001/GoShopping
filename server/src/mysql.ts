@@ -1,8 +1,8 @@
 import mysql from 'mysql2/promise'
 import query from './db'
 import { User } from './types'
-import { CONTINUE, CREATED, NOT_FOUND, OK } from 'constants/http'
-
+import { BAD_REQUEST, CONTINUE, CREATED, NOT_FOUND, OK } from 'constants/http'
+import bcrypt from 'bcryptjs'
 
 type resultsInfoType = {
   message: string,
@@ -16,9 +16,18 @@ export async function addUser(userdata: User) {
   const resultsinfo = initialResult
   try {
     const columns = Object.keys(userdata).join(', ')
-    // const values = Object.values(userdata).map(data => `'${data}'`).join(', ')
-    const values = Object.values(userdata).join(', ')
-    const [results] = await query(`insert into users(${columns}) values(${values})`)
+    // const password = userdata.password
+    // const salt = await bcrypt.genSalt()
+    // const hashedPassword = await bcrypt.hash(password, salt)
+    // userdata.password = hashedPassword
+    // userdata.salt = salt
+    const values = Object.values(userdata)
+    if (userdata.middlename === undefined) {
+
+    }
+    
+    // const results = await query(`insert into users (username, firstname, middlename, lastname, email, phone, city, state, country, password) values (?, ?, ${userdata.middlename || ''}?, ?, ?, ?, ?, ?, ?)`, values)
+    const results = await query(`insert into users (username, firstname, middlename, lastname, email, phone, city, state, country, password) values (${values.map(val => `'${val}'`).join(', ')})`)
     resultsinfo.message = 'User added successfully'
     resultsinfo.status = CREATED
     resultsinfo.result = results
@@ -26,7 +35,7 @@ export async function addUser(userdata: User) {
   catch (err) {
     console.error(err)
     resultsinfo.message = 'User not added'
-    resultsinfo.status = NOT_FOUND
+    resultsinfo.status = BAD_REQUEST
   }
   finally {
     return resultsinfo
@@ -36,7 +45,7 @@ export async function addUser(userdata: User) {
 export async function getUsers() {
   const resultsinfo = initialResult
   try {
-    const [results] = await query(`select username, firstname, middlename, lastname, email, phone, city, state, country from users`)
+    const results = await query(`select username, firstname, middlename, lastname, email, phone, city, state, country from users`)
     resultsinfo.message = 'Users fetched successfully'
     resultsinfo.status = OK
     resultsinfo.result = results
