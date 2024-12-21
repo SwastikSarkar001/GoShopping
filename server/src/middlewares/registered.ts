@@ -7,8 +7,8 @@ const registered: RequestHandler = (req, res, next) => {
     res.status(UNAUTHORIZED).send('')
   }
   else {
-    next()
     res.status(OK).send('')
+    next()
   }
 }
 
