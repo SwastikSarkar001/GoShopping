@@ -3,6 +3,10 @@ import query from './db'
 import { User } from './types'
 import { BAD_REQUEST, CONTINUE, CREATED, NOT_FOUND, OK } from 'constants/http'
 import bcrypt from 'bcryptjs'
+import ApiResponse from 'utils/ApiResponse'
+import ApiError from 'utils/ApiError'
+import asyncHandler from 'utils/asyncHandler'
+import { RequestHandler } from 'express'
 
 type resultsInfoType = {
   message: string,
@@ -12,30 +16,50 @@ type resultsInfoType = {
 
 const initialResult: resultsInfoType = {message: '', status: CONTINUE}
 
-export async function addUser(userdata: User) {
-  const resultsinfo = initialResult
-  try {
-    userdata.middlename === undefined && (userdata.middlename = '')
-    const password = userdata.password
-    const salt = await bcrypt.genSalt()
-    const hashedPassword = await bcrypt.hash(password, salt)
-    userdata.password = hashedPassword
-    // userdata.salt = salt
-    const values = Object.values(userdata)
-    const results = await query(`insert into users (username, firstname, middlename, lastname, email, phone, city, state, country, password) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
-    resultsinfo.message = 'User added successfully'
-    resultsinfo.status = CREATED
-    resultsinfo.result = results
+export const addUser = asyncHandler(async (req, res, next) => {
+  const userdata = req.body as User
+  userdata.middlename === undefined && (userdata.middlename = '')
+  const password = userdata.password
+  const salt = await bcrypt.genSalt()
+  const hashedPassword = await bcrypt.hash(password, salt)
+  userdata.password = hashedPassword
+  // userdata.salt = salt
+  const keys = Object.keys(userdata)
+  const values = Object.values(userdata)
+  const results = await query(`insert into users (${keys}) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
+  
+  if (!results) {
+    throw new ApiError(BAD_REQUEST, 'User not added');  // Throw custom error
   }
-  catch (err) {
-    console.error(err)
-    resultsinfo.message = 'User not added!\n'
-    resultsinfo.status = BAD_REQUEST
-  }
-  finally {
-    return resultsinfo
-  }
-}
+  
+  return new ApiResponse(OK, results, 'User added successfully')
+})
+
+//   (userdata: User) {
+//   const resultsinfo = initialResult
+//   try {
+//     userdata.middlename === undefined && (userdata.middlename = '')
+//     const password = userdata.password
+//     const salt = await bcrypt.genSalt()
+//     const hashedPassword = await bcrypt.hash(password, salt)
+//     userdata.password = hashedPassword
+//     // userdata.salt = salt
+//     const keys = Object.keys(userdata)
+//     const values = Object.values(userdata)
+//     const results = await query(`insert into users (${keys}) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
+//     resultsinfo.message = 'User added successfully'
+//     resultsinfo.status = CREATED
+//     resultsinfo.result = results
+//   }
+//   catch (err) {
+//     console.error(err)
+//     resultsinfo.message = 'User not added!\n'
+//     resultsinfo.status = BAD_REQUEST
+//   }
+//   finally {
+//     return resultsinfo
+//   }
+// }
 
 export async function getUsers() {
   const resultsinfo = initialResult
