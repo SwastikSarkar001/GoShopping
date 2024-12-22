@@ -1,7 +1,6 @@
 import { Router } from "express"
-import { signIn, addUser, getUsers } from "mysql"
+import { signIn, addUser, getUsers } from "controllers/users.controller"
 import { User } from "types"
-import asyncHandler from "utils/asyncHandler"
 import registered from "middlewares/registered"
 
 const authRoutes = Router()
@@ -14,9 +13,7 @@ authRoutes.use(registered)
 //   res.send(response.result)
 // }))
 
-authRoutes.post('/add_user', (req, res, next) => {
-  const response = addUser(req, res, next)
-})
+authRoutes.post('/register', addUser)
 
 // authRoutes.get('/users', asyncHandler(async (req, res) => {
 //   const response = await getUsers()

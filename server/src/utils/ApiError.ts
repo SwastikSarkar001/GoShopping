@@ -2,6 +2,7 @@ export default class ApiError extends Error {
   statusCode: number
   data: any | null
   errors: any[]
+  success: boolean
   
   constructor (
     statusCode: number,
@@ -14,6 +15,7 @@ export default class ApiError extends Error {
     this.data = null
     this.message = message
     this.errors = errors
+    this.success = false
 
     if (stack) {
       this.stack = stack

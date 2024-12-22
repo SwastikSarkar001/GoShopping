@@ -17,6 +17,7 @@ const getEnv = (key: string, defaultValue?: string): string => {
 }
 
 export const PORT = getEnv('PORT', '8080');
+export const API_VERSION = getEnv('API_VERSION', 'v1');
 export const MYSQL_HOST = getEnv('MYSQL_HOST');
 export const MYSQL_USER = getEnv('MYSQL_USER')
 export const MYSQL_PASSWORD = getEnv('MYSQL_PASSWORD')

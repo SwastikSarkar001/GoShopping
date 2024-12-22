@@ -1,9 +1,8 @@
 import express from 'express'
 import cors from 'cors'
-// import bodyParser from 'body-parser'
 import apiRoutes from 'routes/api.route'
 import cookieParser from 'cookie-parser'
-import { APP_URL, PORT } from 'constants/env'
+import { API_VERSION, APP_URL, PORT } from 'constants/env'
 import errorHandler from 'middlewares/errorHandler'
 import ApiError from 'utils/ApiError'
 
@@ -21,7 +20,7 @@ app.get('/', (req, res) => {
   res.send('App is running successfully!')
 })
 
-// app.use('/api', apiRoutes)
+app.use(`/api/${API_VERSION}`, apiRoutes)
 
 app.use(errorHandler)
 

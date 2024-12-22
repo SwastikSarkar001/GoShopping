@@ -16,5 +16,4 @@ export default class ApiResponse {
     this.message = message
     this.success = statusCode < BAD_REQUEST
   }
-  
 }
