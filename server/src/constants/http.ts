@@ -91,3 +91,15 @@ export const TOO_MANY_REQUESTS = 429;
  * 
  */
 export const INTERNAL_SERVER_ERROR = 500;
+
+export type HttpStatusCode = 
+  | typeof CONTINUE
+  | typeof OK
+  | typeof CREATED
+  | typeof BAD_REQUEST
+  | typeof UNAUTHORIZED
+  | typeof NOT_FOUND
+  | typeof CONFLICT
+  | typeof UNPROCESSABLE_CONTENT
+  | typeof TOO_MANY_REQUESTS
+  | typeof INTERNAL_SERVER_ERROR;

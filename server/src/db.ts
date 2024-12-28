@@ -12,7 +12,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
-});
+})
 
 // A wrapper function for executing queries
 const query = async (sql: string, values: any[] = []) => {

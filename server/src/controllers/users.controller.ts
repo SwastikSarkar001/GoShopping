@@ -1,10 +1,12 @@
 import query from '../db'
 import { User } from '../types'
 import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from 'constants/http'
+import { ACCESS_TOKEN_EXPIRY, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET } from 'constants/env'
 import bcrypt from 'bcryptjs'
 import ApiResponse from 'utils/ApiResponse'
 import ApiError from 'utils/ApiError'
 import asyncHandler from 'utils/asyncHandler'
+import jwt from 'jsonwebtoken'
 
 export const addUser = asyncHandler (
   async (req, res, next) => {
@@ -102,4 +104,24 @@ export async function signIn(userdata: signinType) {
   // finally {
   //   return resultsinfo
   // }
+}
+
+const generateAccessToken = (user: User) => {
+  return jwt.sign(
+    user,
+    ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: ACCESS_TOKEN_EXPIRY
+    }
+  )
+}
+
+const generateRefreshToken = (user: User) => {
+  return jwt.sign(
+    user,
+    REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: REFRESH_TOKEN_EXPIRY
+    }
+  )
 }

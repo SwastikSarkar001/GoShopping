@@ -1,11 +1,13 @@
+import { HttpStatusCode } from "constants/http"
+
 export default class ApiError extends Error {
-  statusCode: number
+  statusCode: HttpStatusCode
   data: any | null
   errors: any[]
   success: boolean
   
   constructor (
-    statusCode: number,
+    statusCode: HttpStatusCode,
     message = 'Something went wrong',
     errors: any[] = [],
     stack?: string
