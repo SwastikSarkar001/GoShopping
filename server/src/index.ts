@@ -65,9 +65,9 @@ app.route('/test')
       res.status(200).json(response)
     }
     else {
-      const response = await query('SELECT * FROM users where userid = ?', [1]) as any[]
-      await redis.call('json.set', 'test', '$', JSON.stringify(response[0]))
-      res.status(200).json(response[0])
+      const response = await query('SELECT * FROM users')
+      await redis.call('json.set', 'test', '$', JSON.stringify(response))
+      res.status(200).json(response)
     }
   }
 })
