@@ -59,16 +59,38 @@ app.use(`/api/${API_VERSION}`, apiRoutes)
 app.route('/test')
 .get(async (req, res) => {
   if (redis.status === 'ready') {
-    const d = await redis.call('json.get', 'test')
-    if (d) {
-      const response = JSON.parse(d as string)
+    let cursor = '0'
+    let values = []
+    do {
+      const [newCursor, keys] = await redis.scan(cursor, 'MATCH', 'users:*');
+      cursor = newCursor;
+      for (const key of keys) {
+        const value: string = await redis.call('json.get', key) as string;
+        if (value) {
+          values.push(JSON.parse(value));
+        }
+      }
+    } while (cursor !== '0');
+
+    if (values.length !== 0) {
+      console.log('Cache Hit!')
+      const response = values
       res.status(200).json(response)
     }
     else {
-      const response = await query('SELECT * FROM users')
-      await redis.call('json.set', 'test', '$', JSON.stringify(response))
+      console.log('Cache Miss!')
+      const response = await query('SELECT * FROM users') as any[]
+      response.map(async (val) => {
+        const { userid, ...rest} = val
+        await redis.call('json.set', `users:${val.userid}`, '$', JSON.stringify(rest))
+      })
       res.status(200).json(response)
     }
+  }
+  else {
+    console.log('Redis Server is not connected! Calling database...')
+    const response = await query('SELECT * FROM users') as any[]
+    res.status(200).json(response)
   }
 })
 .post(async (req, res) => {
