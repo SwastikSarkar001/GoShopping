@@ -1,6 +1,5 @@
 import { Router } from "express"
 import { signIn, addUser, getUsers } from "controllers/users.controller"
-import { User } from "types"
 import registered from "middlewares/registered"
 
 const authRoutes = Router()

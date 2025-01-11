@@ -12,7 +12,7 @@ const redis = new Redis({
 })
 
 const pingResult = await redis.ping();
-console.log('Redis Ping Result: ', pingResult);
+console.log('Redis Ping Result:', pingResult);
 
 let retryAttempts = 0
 

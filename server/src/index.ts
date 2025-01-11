@@ -7,6 +7,8 @@ import errorHandler from 'middlewares/errorHandler'
 import ApiError from 'utils/ApiError'
 import redis from 'databases/redis'
 import query from 'databases/db'
+import logHandler from 'middlewares/logHandler'
+import logger from 'utils/logger'
 
 const app = express()
 app.use(cors({
@@ -16,6 +18,7 @@ app.use(cors({
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cookieParser())
+app.use(logHandler)
 
 // await redisClient.connect()
 
@@ -74,11 +77,13 @@ app.route('/test')
 
     if (values.length !== 0) {
       console.log('Cache Hit!')
+      logger.info('Data found from cache.')
       const response = values
       res.status(200).json(response)
     }
     else {
       console.log('Cache Miss!')
+      logger.info('Data not found from cache')
       const response = await query('SELECT * FROM users') as any[]
       response.map(async (val) => {
         const { userid, ...rest} = val
@@ -89,6 +94,7 @@ app.route('/test')
   }
   else {
     console.log('Redis Server is not connected! Calling database...')
+    logger.warn('Redis Server is not connected or seems offline.')
     const response = await query('SELECT * FROM users') as any[]
     res.status(200).json(response)
   }
@@ -118,6 +124,7 @@ app.use(errorHandler)
 
 const server = app.listen(PORT, async () => {
   console.log(`Server is listening at http://localhost:${PORT}/`)
+  // logger.info(`Server is listening at http://localhost:${PORT}/`)
 })
 
 const shutdown = () => {

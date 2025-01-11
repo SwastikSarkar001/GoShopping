@@ -2,7 +2,6 @@ import query from '../databases/db'
 import { User } from '../types'
 import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from 'constants/http'
 import { ACCESS_TOKEN_EXPIRY, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET } from 'constants/env'
-import bcrypt from 'bcryptjs'
 import ApiResponse from 'utils/ApiResponse'
 import ApiError from 'utils/ApiError'
 import asyncHandler from 'utils/asyncHandler'
@@ -12,15 +11,9 @@ export const addUser = asyncHandler (
   async (req, res, next) => {
     try {
       const userdata = req.body as User
-      userdata.middlename === undefined && (userdata.middlename = '')
-      const password = userdata.password
-      const salt = await bcrypt.genSalt()
-      const hashedPassword = await bcrypt.hash(password, salt)
-      userdata.password = hashedPassword
-      // userdata.salt = salt
-      const keys = Object.keys(userdata)
+      if (!userdata.middlename) userdata.middlename = ''
       const values = Object.values(userdata)
-      const results = await query(`insert into users (${keys}) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
+      const results = await query(`CALL addUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
       
       if (!results) {
         throw new ApiError(BAD_REQUEST, 'User not added');  // Throw custom error
