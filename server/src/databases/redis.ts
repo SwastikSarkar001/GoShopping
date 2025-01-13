@@ -11,20 +11,42 @@ const redis = new Redis({
   }
 })
 
-const pingResult = await redis.ping();
-console.log('Redis Ping Result:', pingResult);
-
 let retryAttempts = 0
 
 redis.on('connect', () => {
   console.log('Redis client connected')
+  
 })
-redis.on('ready', () => {
-  console.log('Redis client is ready to accept commands')
+redis.on('ready', async () => {
+  /* Check whether Redis is running */
+  const pingResult = await redis.ping();
+  console.log('Redis Ping Result:', pingResult);
+  
+  /* In case of reconnection show the status */
   if (retryAttempts > 0) {
     console.log('Number of reconnection attempts:', retryAttempts)
     retryAttempts = 0
   }
+  
+  /* Synchronize Redis with MySQL data */
+  let cursor = '0'
+  let values = []
+  let totkeys = []
+  do {
+    const [newCursor, keys] = await redis.scan(cursor, 'MATCH', 'users:*');
+    cursor = newCursor;
+    for (const key of keys) {
+      totkeys.push(key.replace('users:', ''))
+      const value: string = await redis.call('json.get', key) as string;
+      if (value) {
+        values.push(JSON.parse(value));
+      }
+    }
+  } while (cursor !== '0');
+  console.log(totkeys)
+
+  /* Finally display that Redis is ready to accept commands */
+  console.log('Redis client is ready to accept commands')
 })
 redis.on('error', (err) => {
   console.error('Redis client error:', err)
