@@ -6,7 +6,7 @@ import { API_VERSION, APP_URL, PORT } from 'constants/env'
 import errorHandler from 'middlewares/errorHandler'
 import ApiError from 'utils/ApiError'
 import redis from 'databases/redis'
-import query from 'databases/db'
+import query from 'databases/mysql'
 import logHandler from 'middlewares/logHandler'
 import logger from 'utils/logger'
 
@@ -128,11 +128,14 @@ const server = app.listen(PORT, async () => {
 })
 
 const shutdown = () => {
-  server.close(() => {
-    console.log('Server shutting down');
-    process.exit(0);
-  });
-};
+  console.log('Server has been closed.')
+  logger.info('Server has been closed.')
+  server.close((err) => {
+    logger.info(`Server has unexpectedly closed. Message: ${err?.message}`)
+    console.log(err?.stack)
+    process.exit(1);
+  })
+}
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown)

@@ -1,4 +1,5 @@
-import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from 'constants/env';
+import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from 'constants/env'
+import logger from 'utils/logger'
 import Redis from 'ioredis'
 
 const redis = new Redis({
@@ -15,8 +16,9 @@ let retryAttempts = 0
 
 redis.on('connect', () => {
   console.log('Redis client connected')
-  
+  logger.info('Redis Client is connected with Redis Server.')
 })
+
 redis.on('ready', async () => {
   /* Check whether Redis is running */
   const pingResult = await redis.ping();
@@ -27,6 +29,8 @@ redis.on('ready', async () => {
     console.log('Number of reconnection attempts:', retryAttempts)
     retryAttempts = 0
   }
+
+  logger.info('Redis Client is now ready to accept commends.')
   
   /* Synchronize Redis with MySQL data */
   let cursor = '0'
@@ -48,12 +52,16 @@ redis.on('ready', async () => {
   /* Finally display that Redis is ready to accept commands */
   console.log('Redis client is ready to accept commands')
 })
+
 redis.on('error', (err) => {
   console.error('Redis client error:', err)
+  logger.warn('Redis Client has encountered an issue while connecting to Redis Server.')
 })
+
 redis.on('end', () => {
   console.log('Redis client disconnected')
 })
+
 redis.on('reconnecting', (delay: number) => {
   const seconds = Math.floor(delay / 1000)
   const sec = seconds % 60
@@ -67,7 +75,7 @@ redis.on('reconnecting', (delay: number) => {
   }
   console.log(`Redis client reconnecting after ${time}`)
   retryAttempts++
-  
+  logger.info(`Redis Client trying to reconnect to Redis Server. Reconnection attempt: ${retryAttempts}.`)
 })
 
 export default redis

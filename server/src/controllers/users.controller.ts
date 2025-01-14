@@ -1,4 +1,4 @@
-import query from '../databases/db'
+import query from '../databases/mysql'
 import { User } from '../types'
 import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from 'constants/http'
 import { ACCESS_TOKEN_EXPIRY, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET } from 'constants/env'
