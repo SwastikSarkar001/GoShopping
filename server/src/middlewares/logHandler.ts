@@ -3,7 +3,7 @@ import logger from 'utils/logger'; // Import the Winston logger
 
 // Create a stream to pipe Morgan logs to Winston
 const stream: StreamOptions = {
-  write: (message) => logger.info(message.trim()),
+  write: (message) => logger.trac(message.trim()),
 };
 
 // Skip logging during tests

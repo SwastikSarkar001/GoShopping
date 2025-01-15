@@ -13,29 +13,22 @@ export default function SignInForm() {
       <Link to='/' className='block md:hidden font-source-serif text-4xl font-bold'>
         eazzyBizz
       </Link>
-      <div className='text-center'>
-        <div className='mt-2 capitalize text-3xl font-bold font-source-serif'>Sign in</div>
+      <div className='text-center mb-4'>
+        <div className='capitalize text-3xl font-bold font-source-serif'>Sign in</div>
       </div>
-      <div className="relative flex items-center w-4/5 border-b-2 has-[>input[value='']]:border-green-400 has-[>input:focus]:border-cyan-400 has-[>input:invalid]:border-orange-400 has-[>input:not(:placeholder-shown)]:border-cyan-400 has-[>input:invalid:not(:placeholder-shown)]:border-orange-400">
-        <label
-          htmlFor="username"
-          className="absolute top-1/2 -translate-y-1/2 left-8 pointer-events-none transition-all duration-150 ease-[ease] has-[~input:focus]:top-1 has-[~input:focus]:-translate-y-[120%] has-[~input:focus]:left-0 has-[~input:focus]:text-sm has-[~input:not(:placeholder-shown)]:top-1 has-[~input:not(:placeholder-shown)]:-translate-y-[120%] has-[~input:not(:placeholder-shown)]:left-0 has-[~input:not(:placeholder-shown)]:text-sm"
-        >
-          Enter your username
-        </label>
-        <label htmlFor="username" className='size-6 pl-2 cursor-pointer *:size-full'>
-          <UserSVG />
-        </label>
-        <input
-          type="text"
-          name="username"
-          id="username"
-          placeholder="Enter your username"
-          className="w-full focus:outline-none pl-3 pr-2 py-1 bg-transparent placeholder:text-transparent"
-          required
-        />
-      </div>
-      
+      <InputWrapper
+        inputType='text'
+        SvgElement={ <UserSVG /> }
+        uniqueName='username'
+        placeholder='Enter your username'
+       />
+      <InputWrapper
+        inputType='password'
+        SvgElement={ <PasswordSVG /> }
+        uniqueName='signInPassword'
+        placeholder='Enter your password'
+       />
+      <div className='text-left w-4/5 text-slate-500'>Forgot password?</div>
       <button onClick={sampleFn} className="px-6 py-2 *:font-source-serif border-2 rounded-full shadow-md flex gap-4 items-center">
         <div>
           <svg viewBox="0 0 512 512" className='w-[1em]'>
@@ -62,6 +55,48 @@ function PasswordSVG() {
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33" />
     </svg>
+  )
+}
+
+type InputWrapperProps = {
+  inputType?: React.HTMLInputTypeAttribute
+  SvgElement: React.ReactNode
+  uniqueName: string
+  placeholder: string
+}
+
+function InputWrapper({ inputType, SvgElement, uniqueName, placeholder }: InputWrapperProps) {
+  return (
+    <div className="relative mt-4 flex items-center w-4/5 border-b-2 has-[>input[value='']]:border-green-400 has-[>input:focus]:border-cyan-400 has-[>input:invalid]:border-orange-400 has-[>input:not(:placeholder-shown)]:border-cyan-400 has-[>input:invalid:not(:placeholder-shown)]:border-orange-400">
+      <label
+        htmlFor={ uniqueName }
+        className="absolute top-1/2 -translate-y-1/2 left-8 pointer-events-none transition-all duration-150 ease-[ease] has-[~input:focus]:top-1 has-[~input:focus]:-translate-y-[120%] has-[~input:focus]:left-0 has-[~input:focus]:text-sm has-[~input:not(:placeholder-shown)]:top-1 has-[~input:not(:placeholder-shown)]:-translate-y-[120%] has-[~input:not(:placeholder-shown)]:left-0 has-[~input:not(:placeholder-shown)]:text-sm"
+      >
+        { placeholder }
+      </label>
+      <label htmlFor={ uniqueName } className='size-6 pl-2 cursor-pointer *:size-full'>
+        { SvgElement }
+      </label>
+      <input
+        type={inputType}
+        name={ uniqueName }
+        id={ uniqueName }
+        placeholder={ placeholder }
+        className="w-full focus:outline-none pl-3 pr-2 py-1 bg-transparent placeholder:text-transparent"
+        required
+      />
+      {
+        inputType === 'password' && (
+          <button type='button' className='absolute size-2 right-0 top-1/2 -translate-y-1/2 pr-2'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="black">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 19v-7" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 16l3 3 3-3" />
+            </svg>
+          </button>
+        )
+      }
+    </div>
   )
 }
 

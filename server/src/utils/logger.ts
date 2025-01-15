@@ -4,28 +4,9 @@ import { createLogger, format, transports } from 'winston'
 const logger = createLogger({
   level: 'info',
   format: format.combine(
-    format.timestamp(),
-    format.printf(({ level, message, timestamp }) => {
-      const datetime = new Date(timestamp as string)
-      const formatted = datetime.toLocaleString('en-CA', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-        timeZoneName: 'short'
-      }).replace(',', '')
-      return `${formatted} ${level.toUpperCase()}: ${message}`
-    })
+    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss,SSS' }),
+    format.printf(({ level, message, timestamp }) => `${timestamp} [${level.toUpperCase()}]: ${message}`)
   ),
-  // format: format.combine(
-  //   format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  //   format.errors({ stack: true }),
-  //   format.splat(),
-  //   format.json()
-  // ),
   defaultMeta: {
     service: 'eazzyBizz'
   },
