@@ -78,4 +78,27 @@ redis.on('reconnecting', (delay: number) => {
   logger.info(`Redis Client trying to reconnect to Redis Server. Reconnection attempt: ${retryAttempts}.`)
 })
 
+export async function processMessage(message: {content: {operation: string, data: {key: string, value: string}}, ack: () => void, nack: () => void}) {
+  try {
+    const { operation, data } = message.content;
+    
+    if (operation === 'update' && redis.status === 'ready') {
+      await redis.set(data.key, data.value);
+      console.log('Data updated on Redis successfully');
+      logger.info('Data updated on Redis successfully');
+      // Acknowledge message
+      message.ack();
+    }
+    else {
+      console.error('Failed to process message');
+      // Optionally requeue the message for later processing
+      message.nack();
+    }
+  } catch (error) {
+    console.error('Failed to process message', error);
+    // Optionally requeue the message for later processing
+    message.nack();
+  }
+}
+
 export default redis

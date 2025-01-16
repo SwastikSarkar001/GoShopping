@@ -130,7 +130,7 @@ app.route('/test')
 
 app.use(errorHandler)
 
-const server = app.listen(PORT, async () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is listening at http://localhost:${PORT}/`)
   logger.info(`Server is listening at http://localhost:${PORT}/`)
 })

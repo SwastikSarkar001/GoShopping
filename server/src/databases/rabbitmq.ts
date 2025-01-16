@@ -1,67 +1,7 @@
-import { RABBITMQ_PASSWORD, RABBITMQ_PORT, RABBITMQ_USER } from 'constants/env';
+import { RABBITMQ_PASSWORD, RABBITMQ_PORT, RABBITMQ_USER } from 'constants/env'
+import { processMessage } from './redis'
 import rascal from 'rascal'
-import redis from './redis';
-import logger from 'utils/logger';
-
-// const config: rascal.BrokerConfig = {
-//   vhosts: {
-//     '/': {
-//       exchanges: {
-//         'main-exchange': {
-//           type: 'direct',
-//           durable: true,
-//         },
-//       },
-//       queues: {
-//         'task-queue': {
-//           durable: true,
-//           bind: 'main-exchange',
-//           arguments: {
-//             'x-dead-letter-exchange': '', // Default exchange
-//             'x-dead-letter-routing-key': 'task-dlq', // DLQ routing key
-//           },
-//         },
-//         'dead-letter-queue': {
-//           durable: true,
-//         },
-//       },
-//       bindings: [
-//         {
-//           source: 'main-exchange',   // The source (exchange)
-//           destination: 'task-queue', // The destination (queue)
-//           routingKeys: ['task'],        // The routing key
-//         },
-//         {
-//           source: 'main-exchange',
-//           destination: 'dead-letter-queue',
-//           routingKeys: ['task-dlq'],
-//         },
-//       ],
-//       publish: {
-//         'task': {
-//           routingKey: 'task',
-//           persistent: true,
-//         },
-//       },
-//       consume: {
-//         'task': {
-//           queue: 'task-queue',
-//           prefetch: 1,
-//         },
-//       },
-//     },
-//   },
-//   retry: {
-//     retries: 5,
-//     factor: 2, // Exponential backoff
-//     minTimeout: 1000, // 1 second
-//     maxTimeout: 5000, // 5 seconds
-//   },
-//   deadLetter: {
-//     enabled: true,
-//     delay: 1000, // 1 second delay before retrying failed messages
-//   },
-// };
+import logger from 'utils/logger'
 
 const config: rascal.BrokerConfig = {
   vhosts: {
@@ -80,63 +20,48 @@ const config: rascal.BrokerConfig = {
           },
         },
       },
-      queues: {
-        "update_redis_queue": {
+      exchanges: {
+        'RedisExchange': {
           assert: true,
+          type: 'direct',
           options: {
             durable: true,
-            deadLetterExchange: "dead_letters",
-            
-          },
-        },
-        "dead_letters": {
-          assert: true,
-          options: {
-            durable: true,
-          },
-        },
+          }
+        }
       },
+      queues: {
+        "RedisQueue": {
+          assert: true,
+          options: {
+            durable: true,
+            deadLetterExchange: 'RedisExchange'
+          },
+        }
+      },
+      bindings: [{
+        source: 'RedisExchange',
+        destinationType: 'queue',
+        destination: 'RedisQueue'
+      }],
       publications: {
         "update_redis": {
-          queue: "update_redis_queue",
+          queue: "RedisQueue",
         },
       },
       subscriptions: {
         "update_redis": {
-          queue: "update_redis_queue",
-        },
-        "dead_letters": {
-          queue: "dead_letters",
-        },
+          vhost: '/',
+          queue: "RedisQueue"
+        }
       },
     },
   },
 };
 
-let broker: rascal.BrokerAsPromised
+const broker: rascal.BrokerAsPromised = await rascal.BrokerAsPromised.create(config)
+broker.on('error', (err) => console.error(err))
 
-async function processMessage(message: {content: {operation: string, data: {key: string, value: string}}, ack: () => void, nack: () => void}) {
-  try {
-    const { operation, data } = message.content;
-    
-    if (operation === 'update' && redis.status === 'ready') {
-      await redis.set(data.key, data.value);
-      console.log('Data updated on Redis successfully');
-      logger.info('Data updated on Redis successfully');
-      // Acknowledge message
-      message.ack();
-    }
-    else {
-      console.error('Failed to process message');
-      // Optionally requeue the message for later processing
-      message.nack();
-    }
-  } catch (error) {
-    console.error('Failed to process message', error);
-    // Optionally requeue the message for later processing
-    message.nack();
-  }
-}
+export default broker
 
 async function initializeSubscription() {
   try {
@@ -171,8 +96,6 @@ async function initializeSubscription() {
 
 // async function initializeSubscription() {
 //   try {
-//     const broker = await rascal.BrokerAsPromised.create(config);
-
 //     // Subscribe to the queue
 //     const subscription = await broker.subscribe('update_redis');
 
@@ -191,7 +114,7 @@ async function initializeSubscription() {
 //   }
 // }
 
-initializeSubscription();
+await initializeSubscription();
 
 export async function publishUpdate(operation: string, data: { key: string, value: string }) {
   try {
