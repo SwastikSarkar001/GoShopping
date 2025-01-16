@@ -9,6 +9,7 @@ import redis from 'databases/redis'
 import query from 'databases/mysql'
 import logHandler from 'middlewares/logHandler'
 import logger from 'utils/logger'
+import { publishUpdate } from 'databases/rabbitmq'
 
 const app = express()
 app.use(cors({
@@ -30,14 +31,80 @@ app.get('/', (req, res) => {
 
 app.use(`/api/${API_VERSION}`, apiRoutes)
 
+app.route('/test')
+.get(async (req, res) => {
+  if (redis.status === 'ready') {
+    const d = await redis.get('test')
+    res.status(200).send(d)
+  }
+  else {
+    res.status(500).send('Redis is not ready')
+  }
+})
+.post(async (req, res) => {
+  // if (redis.status === 'ready') {
+  //   const d = await redis.set('test', 'Hello, Redis!')
+  //   res.status(200).send(d)
+  // }
+  // else {
+  //   res.status(500).send('Redis is not ready')
+  // }
+  const d = await publishUpdate('update', {key: 'test', value: 'Hello, Redis!'})
+  if (d) {
+    res.status(200).send('OK')
+  }
+  else {
+    res.status(500).send('Redis is not ready')
+  }
+})
+.delete(async (req, res) => {
+  if (redis.status === 'ready') {
+    await redis.del('test')
+    res.sendStatus(204)
+  }
+  else {
+    res.status(500).send('Redis is not ready')
+  }
+})
+
 // app.route('/test')
 // .get(async (req, res) => {
 //   if (redis.status === 'ready') {
-//     const d = await redis.get('test')
-//     res.status(200).send(d)
+//     let cursor = '0'
+//     let values = []
+//     do {
+//       const [newCursor, keys] = await redis.scan(cursor, 'MATCH', 'users:*');
+//       cursor = newCursor;
+//       for (const key of keys) {
+//         const value: string = await redis.call('json.get', key) as string;
+//         if (value) {
+//           values.push(JSON.parse(value));
+//         }
+//       }
+//     } while (cursor !== '0');
+
+//     if (values.length !== 0) {
+//       console.log('Cache Hit!')
+//       logger.info('Data found from cache.')
+//       const response = values
+//       res.status(200).json(response)
+//     }
+//     else {
+//       console.log('Cache Miss!')
+//       logger.info('Data not found from cache')
+//       const response = await query('SELECT * FROM users') as any[]
+//       response.map(async (val) => {
+//         const { userid, ...rest} = val
+//         await redis.call('json.set', `users:${val.userid}`, '$', JSON.stringify(rest))
+//       })
+//       res.status(200).json(response)
+//     }
 //   }
 //   else {
-//     res.status(500).send('Redis is not ready')
+//     console.log('Redis Server is not connected! Calling database...')
+//     logger.warn('Redis Server is not connected or seems offline.')
+//     const response = await query('SELECT * FROM users') as any[]
+//     res.status(200).json(response)
 //   }
 // })
 // .post(async (req, res) => {
@@ -59,72 +126,13 @@ app.use(`/api/${API_VERSION}`, apiRoutes)
 //   }
 // })
 
-app.route('/test')
-.get(async (req, res) => {
-  if (redis.status === 'ready') {
-    let cursor = '0'
-    let values = []
-    do {
-      const [newCursor, keys] = await redis.scan(cursor, 'MATCH', 'users:*');
-      cursor = newCursor;
-      for (const key of keys) {
-        const value: string = await redis.call('json.get', key) as string;
-        if (value) {
-          values.push(JSON.parse(value));
-        }
-      }
-    } while (cursor !== '0');
-
-    if (values.length !== 0) {
-      console.log('Cache Hit!')
-      logger.info('Data found from cache.')
-      const response = values
-      res.status(200).json(response)
-    }
-    else {
-      console.log('Cache Miss!')
-      logger.info('Data not found from cache')
-      const response = await query('SELECT * FROM users') as any[]
-      response.map(async (val) => {
-        const { userid, ...rest} = val
-        await redis.call('json.set', `users:${val.userid}`, '$', JSON.stringify(rest))
-      })
-      res.status(200).json(response)
-    }
-  }
-  else {
-    console.log('Redis Server is not connected! Calling database...')
-    logger.warn('Redis Server is not connected or seems offline.')
-    const response = await query('SELECT * FROM users') as any[]
-    res.status(200).json(response)
-  }
-})
-.post(async (req, res) => {
-  if (redis.status === 'ready') {
-    const d = await redis.set('test', 'Hello, Redis!')
-    res.status(200).send(d)
-  }
-  else {
-    res.status(500).send('Redis is not ready')
-  }
-})
-.delete(async (req, res) => {
-  if (redis.status === 'ready') {
-    const d = await redis.del('test')
-    res.sendStatus(204)
-  }
-  else {
-    res.status(500).send('Redis is not ready')
-  }
-})
-
 
 
 app.use(errorHandler)
 
 const server = app.listen(PORT, async () => {
   console.log(`Server is listening at http://localhost:${PORT}/`)
-  // logger.info(`Server is listening at http://localhost:${PORT}/`)
+  logger.info(`Server is listening at http://localhost:${PORT}/`)
 })
 
 const shutdown = () => {
