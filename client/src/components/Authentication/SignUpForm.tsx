@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useReducer } from 'react'
 import { toast } from 'sonner'
-import { InputText, InputPassword, InputEmail, InputOTP, Button, CheckBox } from './InputElements'
+import { InputText, InputPassword, InputEmail, InputOTP, Button, CheckBox, InputPhone } from './InputElements'
 import { UserSVG } from './Icons'
 
 type UserCredentialsType = {
@@ -286,7 +286,7 @@ function FormThree({data, changeData}: signUpFormProps) {
 function FormFour({data, changeData, otpSent, sendOtp, otpValue, setOtpValue, numInputs}: FormTwoProps) {
   return (
     <div className='flex flex-col gap-4'>
-      <InputEmail id='email' data={data.email} label='Email Address' name='email' changeData={changeData} />
+      <InputPhone id='email' data={data.phone} label='Email Address' name='email' changeData={changeData} />
       <Button
         text='Confirm and Send OTP'
         Icon={

@@ -1,7 +1,9 @@
 import { EmailSVG, PasswordSVG } from "./Icons"
 import { passwordStrength } from "check-password-strength"
 import React, { useState } from "react"
+import PhoneInput from "react-phone-input-2"
 import OTPInput from "react-otp-input"
+import 'react-phone-input-2/lib/style.css'
 
 type CheckBoxProps = {
   /** The id of the checkbox. */
@@ -170,6 +172,48 @@ export function InputEmail({ label, id, name, data, changeData }: EmailProps) {
       />
       <EmailSVG />
     </label>
+  )
+}
+
+type PhoneProps = {
+  /** The input data. */
+  data: string
+  /** The label for the input. */
+  label: string
+  /** The id of the checkbox. */
+  id: string,
+  /** The name of the input. */
+  name: string
+  /** Function to handle input changes. */
+  changeData: (e: React.ChangeEvent<HTMLInputElement>) => void
+}
+
+/** Renders a text input with an id, label and optional logo. */
+export function InputPhone({ label, id, name, data, changeData }: PhoneProps) {
+  const [phone, setPhone] = useState('')
+  return (
+    // <label htmlFor={ name } className="bg-gray-300/20 [&:has(>input:invalid)]:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
+    //   <input
+    //     type="tel"
+    //     id={ id }
+    //     name={ name }
+    //     className="bg-transparent min-w-0 flex-grow outline-none flex-shrink"
+    //     placeholder={ label }
+    //     value={ data }
+    //     onChange={ changeData }
+    //     required
+    //   />
+    //   <EmailSVG />
+    // </label>
+    <PhoneInput
+      placeholder="Phone Number"
+      containerClass="bg-gray-300/20 [&:has(>input:invalid)]:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4 "
+      inputClass="outline-none"
+      country='in'
+      value={phone}
+      onChange={(value) => setPhone(value)}
+      enableAreaCodes
+    />
   )
 }
 
