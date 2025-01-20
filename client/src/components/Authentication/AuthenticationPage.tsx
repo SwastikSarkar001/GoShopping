@@ -17,40 +17,40 @@ export default function AuthenticationPage() {
   return (
     <main className="flex items-center justify-center h-screen bg-white">
       <div className="size-full md:w-[80vw] lg:w-[60vw] md:h-[80vh] shadow-2xl md:rounded-3xl overflow-hidden relative">
-        <div id='sign-up-form' className={`bg-white form-container absolute size-full md:w-[60%] transition-all duration-[600ms] z-10 ${openSignUp ? 'left-[40%] opacity-100' : 'left-0 opacity-0'}`}>
+        <div id='sign-up-form' className={`bg-white form-container absolute size-full md:w-[60%] transition-all duration-[600ms] z-10 ${openSignUp ? 'left-[40%] opacity-100 pointer-events-auto' : 'left-0 opacity-0 pointer-events-none'}`}>
           <SignUpForm />
         </div>
-        <div id='sign-in-form' className={`bg-white form-container absolute size-full md:w-[60%] transition-all duration-[600ms] z-20 ${openSignUp ? 'left-[40%] opacity-0' : 'left-0 opacity-100'}`}>
+        <div id='sign-in-form' className={`bg-white form-container absolute size-full md:w-[60%] transition-all duration-[600ms] z-20 ${openSignUp ? 'left-[40%] opacity-0 pointer-events-none' : 'left-0 opacity-100 pointer-events-auto'}`}>
           <SignInForm />
         </div>
         <div className={`hidden md:block text-white overlay-container absolute top-0 w-[40%] h-full bg-gradient-to-tr from-blue-500 to-indigo-600 overflow-hidden transition-all duration-[600ms] z-30 ${openSignUp ? 'left-0' : 'left-[60%]'}`}>
           <div id='toggle-to-sign-in' className={`absolute gap-4 w-full flex items-center justify-center flex-col py-0 px-[40px] text-center h-full transform-all duration-[600ms] ${openSignUp ? 'left-0 opacity-100 pointer-events-auto' : 'left-full opacity-0 pointer-events-none'}`}>
-            <Link to='/' className='font-source-serif text-4xl font-bold'>
+            <Link to='/' className='font-source-serif text-4xl font-bold' tabIndex={openSignUp ? 0 : -1}>
               eazzyBizz
             </Link>
             <div>
-              Registered already? Click below to sign in.
+              Already have an account? Click the button below to sign in and continue enjoying our services.
             </div>
             <button
               onClick={ toggleSignUp }
               className="rounded-lg px-4 py-2 border-2 font-semibold"
+              tabIndex={openSignUp ? 0 : -1}
             >
-              
               Sign In
             </button>
           </div>
           <div id='toggle-to-sign-up' className={`absolute gap-4 w-full flex items-center justify-center flex-col py-0 px-[40px] text-center h-full transform-all duration-[600ms] ${openSignUp ? '-left-full opacity-0 pointer-events-none' : 'left-0 opacity-100 pointer-events-auto'}`}>
-            <Link to='/' className='font-source-serif text-4xl font-bold'>
+            <Link to='/' className='font-source-serif text-4xl font-bold' tabIndex={openSignUp ? -1 : 0}>
               eazzyBizz
             </Link>
             <div>
-              New to eazzyBizz? Click below to get started!
+            New to eazzyBizz? Click the button below to create your account and start exploring all the features we offer.
             </div>
             <button
               onClick={ toggleSignUp }
               className="rounded-lg px-4 py-2 border-2 font-semibold"
+              tabIndex={openSignUp ? -1 :0}
             >
-              
               Sign Up
             </button>
           </div>

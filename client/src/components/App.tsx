@@ -4,7 +4,7 @@ const HomePage = lazy(() => import('./Landing Page/HomePage'))
 const Features = lazy(() => import('./Features/Features'))
 const Feature = lazy(() => import('./Features/Feature'))
 const InvalidPage = lazy(() => import('./Utilities/InvalidPage'))
-const AuthenticationPage = lazy(() => import('./Sign In/AuthenticationPage'))
+const AuthenticationPage = lazy(() => import('./Authentication/AuthenticationPage'))
 const Dashboard = lazy(() => import('./Dashboard/Dashboard'))
 
 import { Toaster } from 'sonner'
