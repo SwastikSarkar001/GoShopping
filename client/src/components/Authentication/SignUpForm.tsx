@@ -236,17 +236,34 @@ type FormTwoProps = signUpFormProps & {
 }
 
 function FormTwo({data, changeData, otpSent, sendOtp, otpValue, setOtpValue, numInputs}: FormTwoProps) {
+  const [fnState, setFnState] = useState(0)
+  const getDataAndSendOtp = () => {
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        const data = Math.round(Math.random())
+        if (data) {
+          // Add a nodemailer for sending OTP
+          toast.info('An email has been sent to your mail.')
+          setFnState(1)
+          resolve()
+        }
+        else {
+          toast.error('This email address is already in use. Please provide a different email address.')
+          setFnState(0)
+          reject()
+        }
+      }, 500);
+    })
+  }
+
   return (
     <div className='flex flex-col gap-4'>
       <InputEmail id='email' data={data.email} label='Email Address' name='email' changeData={changeData} />
       <Button
-        onClick={
-          (e) => {
-            e.preventDefault()
-            new Promise((resolve, reject) => {
-              setTimeout(Math.round(Math.random()) ? resolve : reject, 2000);
-            })
-          }
+        onClickPromised={
+          async (e) => (
+            getDataAndSendOtp()
+          )
         }
         text='Confirm and Send OTP'
         Icon={
