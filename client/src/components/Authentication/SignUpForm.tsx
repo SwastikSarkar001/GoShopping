@@ -240,6 +240,14 @@ function FormTwo({data, changeData, otpSent, sendOtp, otpValue, setOtpValue, num
     <div className='flex flex-col gap-4'>
       <InputEmail id='email' data={data.email} label='Email Address' name='email' changeData={changeData} />
       <Button
+        onClick={
+          (e) => {
+            e.preventDefault()
+            new Promise((resolve, reject) => {
+              setTimeout(Math.round(Math.random()) ? resolve : reject, 2000);
+            })
+          }
+        }
         text='Confirm and Send OTP'
         Icon={
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">

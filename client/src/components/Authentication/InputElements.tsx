@@ -248,7 +248,7 @@ export function InputOTP({value, setValue, numInputs, disabled}: InputOTPProps) 
 
 type ButtonProps = {
   /** Function to be called on button click. */
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>
   /** Whether the button is disabled. */
   disabled?: boolean
   /** The icon to be displayed inside the button. */
@@ -258,16 +258,42 @@ type ButtonProps = {
 }
 
 export function Button({ onClick, disabled, Icon, text }: ButtonProps) {
+  const [loading, setLoading] = useState(false)
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log('Button clicked');
+    e.preventDefault()
+    if (onClick === undefined) return
+    console.log('Button has a function');
+    if (onClick instanceof Promise) {
+      try {
+        setLoading(true);
+        console.log('Promise started');
+        Promise.resolve(onClick(e))
+      } catch (error) {
+        console.error('Button promise error:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
   return (
     <button
       className='disabled:bg-gray-400 disabled:cursor-not-allowed bg-black hover:bg-blue-500 cursor-pointer transition-colors text-white font-bold p-4 rounded-2xl flex items-center justify-center gap-3'
-      onClick={onClick}
-      disabled={disabled}
+      onClick={handleClick}
+      disabled={disabled || loading}
     >
       <div>
-        { Icon }
+        {
+          loading ?
+          <svg className="animate-spin w-[1em] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+          :
+          Icon
+        }
       </div>
-      <div className="select-none">{ text }</div>
+      <div className="select-none">{ loading ? 'Please wait' : text }</div>
     </button>
   )
 }
