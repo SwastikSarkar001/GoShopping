@@ -33,6 +33,10 @@
         background-color: transparent;
         color: CanvasText;
     }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+    }
 }
 
 @layer components {

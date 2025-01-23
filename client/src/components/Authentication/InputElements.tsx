@@ -4,7 +4,6 @@ import React, { useState } from "react"
 import PhoneInput from "react-phone-input-2"
 import OTPInput from "react-otp-input"
 import 'react-phone-input-2/lib/style.css'
-import { toast } from "sonner"
 
 type CheckBoxProps = {
   /** The id of the checkbox. */
@@ -53,36 +52,25 @@ type InputProps = {
   changeData: (e: React.ChangeEvent<HTMLInputElement>) => void
   /** Whether the input is required. */
   required?: boolean
+  /** The pattern to validate the input. */
+  pattern?: string
 }
 
 /** Renders a text input with an id, label and optional logo. */
-export function InputText({ label, id, name, Logo, data, changeData, required }: InputProps) {
-  if (required === undefined) required = false
+export function InputText({ label, id, name, Logo, data, changeData, required, pattern }: InputProps) {
   return (
-    <label htmlFor={ name } className="bg-gray-300/20 p-4 rounded-2xl flex items-center gap-4">
-      {
-        required ?
-        <input
-          type="text"
-          id={ id }
-          name={ name }
-          className="bg-transparent min-w-0 flex-grow outline-none flex-shrink"
-          placeholder={ label }
-          value={ data }
-          onChange={ changeData }
-          required
-        />
-        :
-        <input
-          type="text"
-          id={ name }
-          name={ name }
-          className="bg-transparent min-w-0 flex-grow outline-none flex-shrink"
-          placeholder={ label }
-          value={ data }
-          onChange={ changeData }
-        />
-      }
+    <label htmlFor={ name } className="bg-gray-300/20 invalid:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
+      <input
+        type="text"
+        id={ id }
+        name={ name }
+        className="bg-transparent min-w-0 flex-grow outline-none flex-shrink"
+        placeholder={ label }
+        value={ data }
+        onChange={ changeData }
+        pattern={ pattern }
+        required={ required }
+      />
       { Logo }
     </label>
   )
@@ -232,6 +220,7 @@ type InputOTPProps = {
 export function InputOTP({value, setValue, numInputs, disabled}: InputOTPProps) {
   return (
     <OTPInput
+      inputType="number"
       value={value}
       onChange={setValue}
       numInputs={numInputs}

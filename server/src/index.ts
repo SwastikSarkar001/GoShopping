@@ -6,10 +6,9 @@ import { API_VERSION, APP_URL, PORT } from 'constants/env'
 import errorHandler from 'middlewares/errorHandler'
 import ApiError from 'utils/ApiError'
 import redis from 'databases/redis'
-// import query from 'databases/mysql'
+import { sendMail } from 'utils/Nodemailer'
 import logHandler from 'middlewares/logHandler'
 import logger from 'utils/logger'
-import { publishUpdate } from 'databases/rabbitmq'
 
 const app = express()
 app.use(cors({
@@ -32,26 +31,23 @@ app.get('/', (req, res) => {
 app.use(`/api/${API_VERSION}`, apiRoutes)
 
 app.route('/test')
-.get(async (req, res) => {
-  if (redis.status === 'ready') {
-    const d = await redis.get('test')
-    res.status(200).send(d)
-  }
-  else {
-    res.status(500).send('Redis is not ready')
-  }
-})
+.get(
+  sendMail
+  // async (req, res) => {
+    // if (redis.status === 'ready') {
+    //   const d = await redis.get('test')
+    //   res.status(200).send(d)
+    // }
+    // else {
+    //   res.status(500).send('Redis is not ready')
+    // }
+
+  // }
+)
 .post(async (req, res) => {
-  // if (redis.status === 'ready') {
-  //   const d = await redis.set('test', 'Hello, Redis!')
-  //   res.status(200).send(d)
-  // }
-  // else {
-  //   res.status(500).send('Redis is not ready')
-  // }
-  const d = await publishUpdate('update', {key: 'test', value: 'Hello, Redis!'})
-  if (d) {
-    res.status(200).send('OK')
+  if (redis.status === 'ready') {
+    const d = await redis.set('test', 'Hello, Redis!')
+    res.status(200).send(d)
   }
   else {
     res.status(500).send('Redis is not ready')
