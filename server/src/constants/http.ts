@@ -28,6 +28,15 @@ export const OK = 200;
 export const CREATED = 201;
 
 /**
+ * HTTP Status Code: 204 - No Content
+ * 
+ * Indicates that the server has successfully fulfilled the request and that there
+ * is no additional content to send in the response payload body.
+ * 
+ */
+export const NO_CONTENT = 204;
+
+/**
  * HTTP Status Code: 400 - Bad Request
  * 
  * The server cannot or will not process the request due to an apparent client error
@@ -96,6 +105,7 @@ export type HttpStatusCode =
   | typeof CONTINUE
   | typeof OK
   | typeof CREATED
+  | typeof NO_CONTENT
   | typeof BAD_REQUEST
   | typeof UNAUTHORIZED
   | typeof NOT_FOUND

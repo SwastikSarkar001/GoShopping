@@ -5,10 +5,14 @@ import cookieParser from 'cookie-parser'
 import { API_VERSION, APP_URL, PORT } from 'constants/env'
 import errorHandler from 'middlewares/errorHandler'
 import ApiError from 'utils/ApiError'
-import redis from 'databases/redis'
+import redis, { escapeSearchSymbols } from 'databases/redis'
 import { sendMail } from 'utils/Nodemailer'
 import logHandler from 'middlewares/logHandler'
 import logger from 'utils/logger'
+import { readData } from 'utils/ReadWrite'
+import sqlQuery from 'databases/mysql'
+// import zxcvbn from 'zxcvbn'
+// import { DiversityType, passwordStrength } from 'check-password-strength'
 
 const app = express()
 app.use(cors({
@@ -23,26 +27,36 @@ app.use(logHandler)
 // await redisClient.connect()
 
 
-app.get('/', (req, res) => {
-  throw new ApiError(500, "Hiii")  // Uncomment to throw a sample error
-  res.send('App is running successfully!')
+app.get('/', async (req, res) => {
+  // throw new ApiError(500, "Hiii")  // Uncomment to throw a sample error
+  // res.send('App is running successfully!')
+  // const d = await redis.call('JSON.GET', `users:1`, '$.jjj') as string
+  // const d = await sqlQuery('SELECT 1') as unknown
+  
+  
+  res.json()
 })
 
 app.use(`/api/${API_VERSION}`, apiRoutes)
 
 app.route('/test')
 .get(
-  sendMail
-  // async (req, res) => {
-    // if (redis.status === 'ready') {
-    //   const d = await redis.get('test')
-    //   res.status(200).send(d)
-    // }
-    // else {
-    //   res.status(500).send('Redis is not ready')
-    // }
+  // sendMail
+  async (req, res) => {
+    if (redis.status === 'ready') {
+      const d = await redis.call('ft.search', 'users-idx', `@email:{${escapeSearchSymbols('Tom_Carter59@yahoo.com')}}`)
 
-  // }
+      // const d = await readData (
+      //   async () => await redis.get('test'),
+      //   async (data) => await redis.set('test', data as string),
+      //   async () => 'Hello, Redis!'
+      // ) as string
+      res.status(200).send(d)
+    }
+    else {
+      res.status(500).send('Redis is not ready')
+    }
+  }
 )
 .post(async (req, res) => {
   if (redis.status === 'ready') {
@@ -56,7 +70,7 @@ app.route('/test')
 .delete(async (req, res) => {
   if (redis.status === 'ready') {
     await redis.del('test')
-    res.sendStatus(204)
+    res.status(204)
   }
   else {
     res.status(500).send('Redis is not ready')
@@ -88,18 +102,24 @@ app.route('/test')
 //     else {
 //       console.log('Cache Miss!')
 //       logger.info('Data not found from cache')
-//       const response = await query('SELECT * FROM users') as any[]
-//       response.map(async (val) => {
-//         const { userid, ...rest} = val
-//         await redis.call('json.set', `users:${val.userid}`, '$', JSON.stringify(rest))
-//       })
-//       res.status(200).json(response)
+//       const response = await sqlQuery('SELECT * FROM users')
+//       if (response instanceof Array) {
+//         const userdata = response as UserWithUserid[]
+//         console.log(userdata)
+//         userdata.map(async (val) => {
+//           if (val.userid) {
+//             const { userid, ...rest} = val
+//             await redis.call('json.set', `users:${val.userid}`, '$', JSON.stringify(rest))
+//           }
+//         })
+//         res.status(200).json(response)
+//       }
 //     }
 //   }
 //   else {
 //     console.log('Redis Server is not connected! Calling database...')
 //     logger.warn('Redis Server is not connected or seems offline.')
-//     const response = await query('SELECT * FROM users') as any[]
+//     const response = await sqlQuery('SELECT * FROM users') as any[]
 //     res.status(200).json(response)
 //   }
 // })

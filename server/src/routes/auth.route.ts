@@ -1,6 +1,7 @@
 import { Router } from "express"
-import { signIn, addUser, getUsers } from "controllers/users.controller"
+import { signIn, addUser, deleteUser, verifyAndGenerateAccessToken } from "controllers/users.controller"
 import registered from "middlewares/registered"
+import { accessProtectedRoute, refreshProtectedRoute } from "middlewares/protectedRouteHandlers"
 
 const authRoutes = Router()
 
@@ -12,7 +13,11 @@ authRoutes.use(registered)
 //   res.send(response.result)
 // }))
 
+authRoutes.post('/signin', signIn)
+// authRoutes.delete('/signout', signOut)
 authRoutes.post('/register', addUser)
+authRoutes.delete('/remove', deleteUser)
+authRoutes.get('/refresh', refreshProtectedRoute, verifyAndGenerateAccessToken)
 
 // authRoutes.get('/users', asyncHandler(async (req, res) => {
 //   const response = await getUsers()

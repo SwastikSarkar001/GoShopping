@@ -33,21 +33,21 @@ redis.on('ready', async () => {
   logger.info('Redis Client is now ready to accept commends.')
   
   /* Synchronize Redis with MySQL data */
-  let cursor = '0'
-  let values = []
-  let totkeys = []
-  do {
-    const [newCursor, keys] = await redis.scan(cursor, 'MATCH', 'users:*');
-    cursor = newCursor;
-    for (const key of keys) {
-      totkeys.push(key.replace('users:', ''))
-      const value: string = await redis.call('json.get', key) as string;
-      if (value) {
-        values.push(JSON.parse(value));
-      }
-    }
-  } while (cursor !== '0');
-  console.log(totkeys)
+  // let cursor = '0'
+  // let values = []
+  // let totkeys = []
+  // do {
+  //   const [newCursor, keys] = await redis.scan(cursor, 'MATCH', 'users:*');
+  //   cursor = newCursor;
+  //   for (const key of keys) {
+  //     totkeys.push(key.replace('users:', ''))
+  //     const value: string = await redis.call('json.get', key) as string;
+  //     if (value) {
+  //       values.push(JSON.parse(value));
+  //     }
+  //   }
+  // } while (cursor !== '0');
+  // console.log(totkeys)
 
   /* Finally display that Redis is ready to accept commands */
   console.log('Redis client is ready to accept commands')
@@ -77,5 +77,9 @@ redis.on('reconnecting', (delay: number) => {
   retryAttempts++
   logger.info(`Redis Client trying to reconnect to Redis Server. Reconnection attempt: ${retryAttempts}.`)
 })
+
+export function escapeSearchSymbols(input: string): string {
+  return input.replace(/([@{}\\\[\]():?*+-/!<>~^"=,.$%|])/g, '\\$1');
+}
 
 export default redis
