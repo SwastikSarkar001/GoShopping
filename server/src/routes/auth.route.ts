@@ -1,5 +1,6 @@
 import { Router } from "express"
-import { signIn, addUser, deleteUser, verifyAndGenerateAccessToken } from "controllers/users.controller"
+import { signIn, signOut, addUser, deleteUser, verifyAndGenerateAccessToken } from "controllers/users.controller"
+import { verifyAndSendOtp, verifyOtp } from "controllers/utils.controller"
 import registered from "middlewares/registered"
 import { accessProtectedRoute, refreshProtectedRoute } from "middlewares/protectedRouteHandlers"
 
@@ -13,8 +14,10 @@ authRoutes.use(registered)
 //   res.send(response.result)
 // }))
 
+authRoutes.get('/check-field', verifyAndSendOtp)
+authRoutes.get('/check-otp', verifyOtp)
 authRoutes.post('/signin', signIn)
-// authRoutes.delete('/signout', signOut)
+authRoutes.delete('/signout', accessProtectedRoute, signOut)
 authRoutes.post('/register', addUser)
 authRoutes.delete('/remove', deleteUser)
 authRoutes.get('/refresh', refreshProtectedRoute, verifyAndGenerateAccessToken)

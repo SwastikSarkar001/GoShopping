@@ -1,4 +1,4 @@
-import { NODE_ENV } from "constants/env";
+import { API_VERSION, NODE_ENV } from "constants/env";
 import { CookieOptions } from "express";
 
 export const accessTokenOptions: CookieOptions = {
@@ -12,5 +12,5 @@ export const refreshTokenOptions: CookieOptions = {
   secure: NODE_ENV.toLowerCase() === 'production',
   sameSite: 'strict',
   expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days,
-  path: '/auth/refresh'
+  path: `api/${API_VERSION}/auth/refresh`
 }

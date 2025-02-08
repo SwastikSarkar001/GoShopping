@@ -32,7 +32,7 @@ app.get('/', async (req, res) => {
   // res.send('App is running successfully!')
   // const d = await redis.call('JSON.GET', `users:1`, '$.jjj') as string
   // const d = await sqlQuery('SELECT 1') as unknown
-  
+  const d = await sqlQuery('CALL createSession(?, ?)')
   
   res.json()
 })

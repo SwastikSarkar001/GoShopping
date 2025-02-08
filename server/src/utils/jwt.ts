@@ -12,12 +12,12 @@ export type RefreshTokenPayload = {
 
 type SignOptionsAndSecret = SignOptions & { secret: string }
 
-const AccessTokenSignOptions: SignOptionsAndSecret = {
+export const AccessTokenSignOptions: SignOptionsAndSecret = {
   secret: ACCESS_TOKEN_SECRET,
   expiresIn: ACCESS_TOKEN_EXPIRY
 }
 
-const RefreshTokenSignOptions: SignOptionsAndSecret = {
+export const RefreshTokenSignOptions: SignOptionsAndSecret = {
   secret: REFRESH_TOKEN_SECRET,
   expiresIn: REFRESH_TOKEN_EXPIRY
 }
@@ -28,9 +28,9 @@ const defaults: SignOptions = {
 
 const signToken = (
   payload: AccessTokenPayload | RefreshTokenPayload,
-  options?: SignOptionsAndSecret
+  options: SignOptionsAndSecret
 ) => {
-  const { secret, ...rest } = options || (payload.hasOwnProperty('userid')) ? AccessTokenSignOptions : RefreshTokenSignOptions
+  const { secret, ...rest } = options
   return jwt.sign(payload, secret, { ...defaults, ...rest })
 }
 

@@ -1,4 +1,4 @@
-export type emptyProps = {}
+export type emptyProps = {}  // eslint-disable-line @typescript-eslint/no-empty-object-type
 
 export type messageType = {
   heading: string,
@@ -37,7 +37,6 @@ type User = AuthContextType | null
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  id: string,
   displayName?: string,
   profilePic?: string
 }

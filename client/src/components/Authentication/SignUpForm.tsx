@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useReducer } from 'react'
 import { toast } from 'sonner'
-import { InputText, InputPassword, InputOTP, Button, CheckBox, InputPhone } from './InputElements'
+import { InputText, InputPassword, Button, CheckBox } from './InputElements'
 import { UserSVG } from './Icons'
-import EmailVerification from './Sign Up Components/EmailVerification'
+import FormTwo from './Sign Up Components/FormTwo'
 
 type UserCredentialsType = {
   fname: string
@@ -80,8 +80,8 @@ export default function SignUpForm() {
     },
     initialState
   )
-  const changeData = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: e.target.name as dispatchType['type'], value: e.target.value })
+  const changeData = (type: dispatchType['type'], value: string) => {
+    dispatch({ type: type, value: value })
   }
 
   const navigate = useNavigate()
@@ -92,10 +92,21 @@ export default function SignUpForm() {
   }
 
   // OTP state and dispatch function for updating the state
-  const [otpSent, setOtpSent] = useState(false)
-  const sendOTP = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    setOtpSent(true)
+  const [savedData, setSavedData] = useState<string | null>(null)
+  const [disableAll, setDisableAll] = useState([false, false])
+  const disableEmailField = (value: boolean) => {
+    setDisableAll(prev => {
+      const newState = [...prev]
+      newState[0] = value
+      return newState
+    })
+  }
+  const disablePhoneField = (value: boolean) => {
+    setDisableAll(prev => {
+      const newState = [...prev]
+      newState[1] = value
+      return newState
+    })
   }
   const [otpValue, setOtpValue] = useState('')
   const numInputs = 4
@@ -103,24 +114,28 @@ export default function SignUpForm() {
   // Manage the steps and block pages
   const stepPages = [
     <UserRegistration data={ userCredentials } changeData={changeData} />,
-    <EmailVerification
-    data={ userCredentials }
-    changeData={changeData}
-    otpSent={otpSent}
-    sendOtp={sendOTP}
-    otpValue={otpValue}
-    setOtpValue={setOtpValue}
-    numInputs={numInputs}
+    <FormTwo
+      data={ userCredentials }
+      changeData={changeData}
+      savedEmail={savedData}
+      setSavedEmail={setSavedData}
+      otpValue={otpValue}
+      setOtpValue={setOtpValue}
+      numInputs={numInputs}
+      disableAll={disableAll[0]}
+      setDisableAll={disableEmailField}
     />,
     <UserPasswordSetup data={ userCredentials } changeData={changeData} />,
-    <FormFour
-    data={ userCredentials }
-    changeData={changeData}
-    otpSent={otpSent}
-    sendOtp={sendOTP}
-    otpValue={otpValue}
-    setOtpValue={setOtpValue}
-    numInputs={numInputs}
+    <FormTwo
+      data={ userCredentials }
+      changeData={changeData}
+      savedEmail={savedData}
+      setSavedEmail={setSavedData}
+      otpValue={otpValue}
+      setOtpValue={setOtpValue}
+      numInputs={numInputs}
+      disableAll={disableAll[1]}
+      setDisableAll={disablePhoneField}
     />,
     <FormFive data={ userCredentials } changeData={changeData} />,
     <UserConsent data={ userCredentials } changeData={changeData} />
@@ -134,7 +149,7 @@ export default function SignUpForm() {
     <div className='bg-white rounded-2xl flex flex-col items-center justify-center relative h-full'>
       <h1 className="font-bold text-3xl font-source-serif">Get Started!</h1>
       <p className="text-gray-400">Register a new account</p>
-      <form className="flex flex-col gap-4 w-3/5 mt-8" method='post'>
+      <form className="flex flex-col gap-4 w-[70%] mt-8" method='post'>
         <div className='text-center text-sm'>
           Step { step } of { totalSteps }
         </div>
@@ -216,7 +231,12 @@ function StepNavigator({blockPage, currentStep, setStep, totalSteps, submitFunc}
   )
 }
 
-type signUpFormProps = {data: UserCredentialsType, changeData: (e: React.ChangeEvent<HTMLInputElement>) => void}
+export type signUpFormProps = {
+  /** The user data of Registration Form */
+  data: UserCredentialsType,
+  /** Function to change the data in the form */
+  changeData: (type: dispatchType['type'], value: string) => void
+}
 
 function UserRegistration({data, changeData}: signUpFormProps) {
   return (
@@ -227,7 +247,7 @@ function UserRegistration({data, changeData}: signUpFormProps) {
         label='First Name'
         name='fname'
         Logo={<UserSVG />}
-        changeData={changeData}
+        changeData={e => changeData('fname', e.target.value)}
         pattern="[A-Za-z\\-']+"
         required
       />
@@ -237,7 +257,7 @@ function UserRegistration({data, changeData}: signUpFormProps) {
         label='Middle Name'
         name='mname'
         Logo={<UserSVG />}
-        changeData={changeData}  
+        changeData={e => changeData('mname', e.target.value)}  
       />
       <InputText
         id='lname'
@@ -245,7 +265,7 @@ function UserRegistration({data, changeData}: signUpFormProps) {
         label='Last Name'
         name='lname'
         Logo={<UserSVG />}
-        changeData={changeData}
+        changeData={e => changeData('lname', e.target.value)}
         required
       />
     </div>
@@ -261,7 +281,7 @@ function UserPasswordSetup({data, changeData}: signUpFormProps) {
         label='Password'
         autocomplete='new-password'
         data={ data.password }
-        changeData={ changeData }
+        changeData={e => changeData('password', e.target.value)}
         requirePasswordStrength
         />
       <InputPassword
@@ -269,43 +289,43 @@ function UserPasswordSetup({data, changeData}: signUpFormProps) {
         name='confirm'
         label='Confirm Password'
         data={ data.confirm }
-        changeData={ changeData }
+        changeData={e => changeData('confirm', e.target.value)}
         />
     </div>
   )
 }
 
-function FormFour({data, changeData, otpSent, sendOtp, otpValue, setOtpValue, numInputs}: FormTwoProps) {
-  return (
-    <div className='flex flex-col gap-4'>
-      <InputPhone id='phone' data={data.phone} label='Phone Number' name='phone' changeData={changeData} />
-      <Button
-        text='Confirm and Send OTP'
-        Icon={
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-          </svg>
-        }
-      />
-      <InputOTP value={otpValue} setValue={setOtpValue} numInputs={numInputs} disabled={false} />
-      <Button
-        text='Check OTP and Verify Email'
-        Icon={
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-          </svg>
-        }
-      />
-    </div>
-  )
-}
+// function FormFour({data, changeData, otpSent, sendOtp, otpValue, setOtpValue, numInputs}: FormTwoProps) {
+//   return (
+//     <div className='flex flex-col gap-4'>
+//       <InputPhone id='phone' data={data.phone} label='Phone Number' name='phone' changeData={changeData} />
+//       <Button
+//         text='Confirm and Send OTP'
+//         Icon={
+//           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">
+//             <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+//           </svg>
+//         }
+//       />
+//       <InputOTP value={otpValue} setValue={setOtpValue} numInputs={numInputs} disabled={false} />
+//       <Button
+//         text='Check OTP and Verify Email'
+//         Icon={
+//           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">
+//             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+//           </svg>
+//         }
+//       />
+//     </div>
+//   )
+// }
 
 function FormFive({data, changeData}: signUpFormProps) {
   return (
     <div className='flex flex-col gap-4'>
-      <InputText id='fname' data={data.fname} label='First Name' name='fname' Logo={<UserSVG />} changeData={changeData} required />
-      <InputText id='mname' data={data.mname} label='Middle Name' name='mname' Logo={<UserSVG />} changeData={changeData} />
-      <InputText id='lname' data={data.lname} label='Last Name' name='lname' Logo={<UserSVG />} changeData={changeData} required />
+      <InputText id='fname' data={data.fname} label='First Name' name='fname' Logo={<UserSVG />} changeData={e => changeData('fname', e.target.value)} required />
+      <InputText id='mname' data={data.mname} label='Middle Name' name='mname' Logo={<UserSVG />} changeData={e => changeData('mname', e.target.value)} />
+      <InputText id='lname' data={data.lname} label='Last Name' name='lname' Logo={<UserSVG />} changeData={e => changeData('lname', e.target.value)} required />
     </div>
   )
 }

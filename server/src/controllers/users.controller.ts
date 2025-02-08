@@ -1,88 +1,18 @@
 import sqlQuery from '../databases/mysql'
 import { UserWithUserid } from '../types'
-import { BAD_REQUEST, CREATED, NO_CONTENT, OK, UNAUTHORIZED } from 'constants/http'
+import { BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, OK, UNAUTHORIZED } from 'constants/http'
 import ApiResponse from 'utils/ApiResponse'
 import ApiError from 'utils/ApiError'
 import asyncHandler from 'utils/asyncHandler'
-import redis, { escapeSearchSymbols } from 'databases/redis'
+import redis from 'databases/redis'
 import logger from 'utils/logger'
-import { AccessTokenPayload, generateAccessToken, generateRefreshToken, RefreshTokenPayload, verifyToken } from 'utils/jwt'
+import { AccessTokenPayload, generateAccessToken, generateRefreshToken, RefreshTokenPayload } from 'utils/jwt'
 import { accessTokenOptions, refreshTokenOptions } from 'utils/cookies'
 import UserSchema from 'models/user.model'
 import SessionSchema from 'models/session.model'
 import { ZodError } from 'zod'
+import { isUserExists } from './utils.controller'
 
-/**
- * Checks if a user exists in the database based on the provided field and value.
- * 
- * This function first checks the Redis database for the user. If the user is not found in Redis,
- * it then checks the MySQL database. If the user is found in MySQL, the user data is cached in Redis.
- * 
- * @param field - The field to check against, either 'email' or 'phone'.
- * @param value - The value of the field to check.
- * @returns A promise that resolves to a boolean indicating whether the user exists.
- * 
- * @throws Will throw an error if multiple users exist with the same email or phone number in Redis.
- * 
- * @remarks
- * **This function must be used inside the callback function of `asyncHandler()` function for smooth error handling,**
- * **or else the server may crash due to unhandled exceptions.**
- */
-export const isUserExists = async (field: 'email' | 'phone', value: string): Promise<boolean> => {
-
-  /* If Redis is ready then check from Redis database */
-  if (redis.status !== 'ready') {
-    const data = await redis.call('FT.SEARCH', 'users-idx', `@${field}:${escapeSearchSymbols(value)}`) as any[]
-
-    /* If user exists then return true */
-    if (data[0] == 1) {  // Question: Should I reset the expiry time of the key?
-      return true
-    }
-
-    /* If user does not exist then check from MySQL database */
-    else if (data[0] == 0) {
-      const sqlData = await sqlQuery(`CALL getAllUserDetails(?, ?)`, [field, value])
-
-      /* If there exist a data then return the data, cache it and return true */
-      if (sqlData instanceof Array) {
-        const [result] = sqlData[0] as UserWithUserid[]
-        const {userid, ...rest} = result
-        await redis
-          .pipeline()
-          .call('JSON.SET', `users:${userid}`, '$', JSON.stringify(rest))
-          .expire(`users:${userid}`, 7*24*3600)
-          .exec()
-        return true
-      }
-
-      /* If no data exists then return false */
-      else {
-        return false
-      }
-    }
-
-    /* If multiple users exist then throw an error indicating multiple users exist */
-    else {
-      logger.error('Multiple users exist with the same email or phone number in Redis database')
-      return true
-    }
-  }
-
-  /* If Redis is not ready then check from MySQL database */
-  else {
-    const sqlData = await sqlQuery(`CALL getAllUserDetails(?, ?)`, [field, value])
-
-    /* If there exist a data then return the data and return true */
-    if (sqlData instanceof Array) {
-      return true
-    }
-
-    /* If no data exists then return false */
-    else {
-      return false
-    }
-  }
-}
 
 export const addUser = asyncHandler (
   async (req, res, next) => {
@@ -112,11 +42,11 @@ export const addUser = asyncHandler (
         const userAgent = req.headers['user-agent'] as string
 
         /* Check if user already exists */
-        if (!(await isUserExists('email', userdata.email))) {
-          throw new ApiError(BAD_REQUEST, 'The provided email is already in use. Please use a different email address.')
+        if (await isUserExists('email', userdata.email)) {
+          throw new ApiError(CONFLICT, 'The provided email is already in use. Please use a different email address.')
         }
-        if (!(await isUserExists('phone', userdata.phone))) {
-          throw new ApiError(BAD_REQUEST, 'The provided phone number is already in use. Please use a different phone number.')
+        if (await isUserExists('phone', userdata.phone)) {
+          throw new ApiError(CONFLICT, 'The provided phone number is already in use. Please use a different phone number.')
         }
 
         /* Prepare the values to insert into the database */
@@ -124,7 +54,6 @@ export const addUser = asyncHandler (
 
         /* Insert user data into database and get the result */
         const results = await sqlQuery(`CALL addUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
-
         /* If user added successfully then return the user data */
         if (results instanceof Array) {
           const [result] = results[0] as returnType[]
@@ -306,10 +235,126 @@ export const verifyAndGenerateAccessToken = asyncHandler (
   }
 )
 
+/**
+ * Handles user sign-in by validating the provided email and password, creating a session, and generating access and refresh tokens.
+ * 
+ * This function performs the following steps:
+ * 1. Validates the user data from the request body using the `UserSchema`.
+ * 2. Checks if the user exists in the database by calling the `signIn` stored procedure.
+ * 3. If the user exists, creates a session for the user by calling the `createSession` stored procedure.
+ * 4. Caches the user and session data in Redis if Redis is ready.
+ * 5. Generates access and refresh tokens for the user.
+ * 6. Sends the response with the tokens and user data.
+ * 
+ * @param req - The request object containing the user data in the body.
+ * @param res - The response object used to send the response.
+ * @param next - The next middleware function in the stack.
+ * 
+ * @throws {ApiError} If the user data is invalid, the user does not exist, or there is a problem creating the session.
+ */
 export const signIn = asyncHandler (
   async (req, res, next) => {
     try {
-      res.status(NO_CONTENT)
+      // Get the user data from the request body and validate
+      const userdata = UserSchema.pick({
+          email: true,
+          password: true
+        }
+      ).parse(req.body)
+
+      // Check if the user exists in the database
+      const results = await sqlQuery(`CALL signIn(?, ?)`, [userdata.email, userdata.password])
+      if (results instanceof Array) {
+        const [result] = results[0] as UserWithUserid[]
+        const user = UserSchema.pick({
+            userid: true,
+            firstname: true,
+            middlename: true,
+            lastname: true,
+            email: true,
+            phone: true,
+            city: true,
+            state: true,
+            country: true
+          }
+        ).parse(result)
+        const {userid, ...rest} = user
+        const userAgent = req.headers['user-agent'] as string
+        const sessionResults = await sqlQuery(`CALL createSession(?, ?)`, [userid, userAgent])
+        if (sessionResults instanceof Array) {
+          const [sessionResult] = sessionResults[0] as any[]
+          if (sessionResult === undefined) throw new ApiError(UNAUTHORIZED, 'Problem creating session')
+          const sessionid = sessionResult['@sid']
+          const restSession = SessionSchema.pick({
+            userid: true,
+            useragent: true,
+            expires: true
+          })
+          .parse({
+            userid: userid,
+            useragent: userAgent,
+            expires: sessionResult['@exp']
+          })
+          redis.status === 'ready' &&
+          await redis
+            .pipeline()
+            .call('JSON.SET', `users:${userid}`, '$', JSON.stringify(rest))
+            .expire(`users:${userid}`, 7*24*3600)
+            .call('JSON.SET', `sessions:${sessionid}`, '$', JSON.stringify(restSession))
+            .expire(`sessions:${sessionid}`, 7*24*3600)
+            .exec()
+          const accessToken = generateAccessToken({ userid: userid.toString(), sessionid: sessionid })
+          const refreshToken = generateRefreshToken({ sessionid: sessionid })
+          res
+            .status(OK)
+            .cookie('access_token', accessToken, accessTokenOptions)
+            .cookie('refresh_token', refreshToken, refreshTokenOptions)
+            .json(
+              new ApiResponse(
+                OK,
+                [
+                  {
+                    clientData: rest,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken
+                  }
+                ],
+                'User signed in successfully'
+              )
+            )
+        }
+        else {
+          throw new ApiError(UNAUTHORIZED, 'Problem creating session')
+        }
+      }
+      else {
+        throw new ApiError(UNAUTHORIZED, 'Invalid email or password')
+      }
+    }
+    catch (err) {
+      next(err)
+    }
+  }
+)
+
+export const signOut = asyncHandler (
+  async (req, res, next) => {
+    try {
+      // Get the session id from the request body and validate
+      const data = req.body
+
+      // Check if the session exists in the database
+      const results = await sqlQuery(`CALL signOut(?)`, [data.sessionid])
+      if (results instanceof Array) {
+        const [result] = results[0] as any[]
+        if (result === undefined) throw new ApiError(UNAUTHORIZED, 'Session not found')
+        redis.status === 'ready' &&
+        await redis.del(`sessions:${data.sessionid}`)
+        res.status(NO_CONTENT).send()
+      }
+      else {
+        throw new ApiError(UNAUTHORIZED, 'Session not found')
+      }
     }
     catch (err) {
       next(err)
