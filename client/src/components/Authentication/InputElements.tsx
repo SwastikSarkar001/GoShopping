@@ -1,8 +1,8 @@
-import { EmailSVG, PasswordSVG } from "./Icons"
+import { EmailSVG, PasswordSVG, PhoneSVG } from "./Icons"
 import { passwordStrength } from "check-password-strength"
 import React, { useState } from "react"
-// import PhoneInput from "react-phone-input-2"
 import OTPInput from "react-otp-input"
+import PhoneInput from "react-phone-input-2"
 import 'react-phone-input-2/lib/style.css'
 
 type CheckBoxProps = {
@@ -59,7 +59,7 @@ type InputProps = {
 /** Renders a text input with an id, label and optional logo. */
 export function InputText({ label, id, name, Logo, data, changeData, required, pattern }: InputProps) {
   return (
-    <label htmlFor={ name } className="bg-gray-300/20 invalid:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
+    <label htmlFor={ id } className="bg-gray-300/20 invalid:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
       <input
         type="text"
         id={ id }
@@ -157,7 +157,7 @@ export function InputEmail({ label, id, name, data, changeData, isValid, isInval
   return (
     <label
       htmlFor={ id }
-      className={ `${isInvalid ? 'bg-red-300/20' : isValid ? 'bg-green-300/20' : 'bg-gray-300/20'}  p-4 rounded-2xl flex items-center gap-4` }
+      className={ `${isInvalid ? 'bg-red-300/20' : isValid ? 'bg-green-300/20' : 'bg-gray-300/20'} p-4 rounded-2xl flex items-center gap-4` }
     >
       <input
         type="email"
@@ -175,47 +175,65 @@ export function InputEmail({ label, id, name, data, changeData, isValid, isInval
   )
 }
 
-// type PhoneProps = {
-//   /** The input data. */
-//   data: string
-//   /** The label for the input. */
-//   label: string
-//   /** The id of the checkbox. */
-//   id: string,
-//   /** The name of the input. */
-//   name: string
-//   /** Function to handle input changes. */
-//   changeData: (e: React.ChangeEvent<HTMLInputElement>) => void
-// }
+type PhoneProps = {
+  /** The input data. */
+  data: string
+  /** The label for the input. */
+  label: string
+  /** The id of the checkbox. */
+  id: string,
+  /** The name of the input. */
+  name: string
+  /** Function to handle input changes. */
+  changeData: (e: React.ChangeEvent<HTMLInputElement>) => void
+  /** Whether the input is required. */
+  required?: boolean
+  /** Disable the phone field */
+  disabled?: boolean
+  /** Whether the given data is valid or not */
+  isValid?: boolean
+  /** Whether the given data is invalid or not */
+  isInvalid?: boolean
+}
 
-// /** Renders a text input with an id, label and optional logo. */
-// export function InputPhone({ label, id, name, data, changeData }: PhoneProps) {
-//   const [phone, setPhone] = useState('')
-//   return (
-//     // <label htmlFor={ name } className="bg-gray-300/20 [&:has(>input:invalid)]:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
-//     //   <input
-//     //     type="tel"
-//     //     id={ id }
-//     //     name={ name }
-//     //     className="bg-transparent min-w-0 flex-grow outline-none flex-shrink"
-//     //     placeholder={ label }
-//     //     value={ data }
-//     //     onChange={ changeData }
-//     //     required
-//     //   />
-//     //   <EmailSVG />
-//     // </label>
-//     <PhoneInput
-//       placeholder="Phone Number"
-//       containerClass="bg-gray-300/20 [&:has(>input:invalid)]:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4 "
-//       inputClass="outline-none"
-//       country='in'
-//       value={phone}
-//       onChange={(value) => setPhone(value)}
-//       enableAreaCodes
-//     />
-//   )
-// }
+/** Renders a text input with an id, label and optional logo. */
+export function InputPhone({ label, id, name, data, changeData, required, disabled, isInvalid, isValid }: PhoneProps) {
+  if (isValid && isInvalid) throw new Error('Both isValid and isInvalid props cannot be true at the same time.')
+  return (
+    <label htmlFor={ id } className={`${isInvalid ? 'bg-red-300/20' : isValid ? 'bg-green-300/20' : 'bg-gray-300/20'} p-4 rounded-2xl flex items-center gap-4`}>
+      <PhoneInput
+        placeholder={ label }
+        containerClass=""
+        buttonClass="!h-auto !border-none !bg-transparent"
+        inputClass="!outline-none !h-auto !w-full !border-none"
+        searchClass="!bg-transparent"
+        value={ data }
+        onChange={
+          (phoneNumber, cnData, event, val) => {
+            const syntheticEvent = {
+              target: {
+                value: val,
+              },
+            } as React.ChangeEvent<HTMLInputElement>;
+            changeData(syntheticEvent);
+          }
+        }
+        inputProps={{
+          name: name,
+          id: id,
+          required: required,
+          style: {
+            background: 'transparent',
+            fontSize: 'inherit'
+          }
+        }}
+        enableAreaCodes
+        disabled={ disabled }
+      />
+      <PhoneSVG />
+    </label>
+  )
+}
 
 type InputOTPProps = {
   /** The value of the OTP input. */
@@ -226,27 +244,43 @@ type InputOTPProps = {
   numInputs: number
   /** Whether the OTP input is disabled. */
   disabled: boolean
+  /** The status of the OTP input. */
+  otpStatus: 'success' | 'error' | 'none'
+  /** Function to set the OTP input status. */
+  setOtpStatus: React.Dispatch<React.SetStateAction<'success' | 'error' | 'none'>>
 }
 
-export function InputOTP({value, setValue, numInputs, disabled}: InputOTPProps) {
+export function InputOTP({value, setValue, numInputs, disabled, otpStatus, setOtpStatus}: InputOTPProps) {
   return (
     <OTPInput
-      inputType="number"
+      key={`otp-${otpStatus}`}
+      inputType={otpStatus === 'success' ? "password" : "number"}
       value={value}
-      onChange={setValue}
+      onChange={
+        (value) => {
+          setOtpStatus('none');
+          setValue(value)
+        }
+      }
       numInputs={numInputs}
       renderInput={
         (inputProps, i) => (
-          <input disabled={disabled} key={i} {...inputProps} />
+          <input
+            disabled={disabled}
+            key={i}
+            {...inputProps}
+          />
         )
       }
-      containerStyle='flex gap-4'
-      inputStyle='bg-gray-300/20 flex-grow p-4 rounded-2xl disabled:cursor-not-allowed'
+      shouldAutoFocus
+      containerStyle={`flex gap-4 ${otpStatus === 'error' ? 'shake' : ''}`}
+      inputStyle={`flex-grow p-4 rounded-2xl disabled:cursor-not-allowed ${(otpStatus === 'success') ? '!bg-green-300/20' : (otpStatus === 'error') ? '!bg-red-300/20' : 'bg-gray-300/20'}`}
       placeholder={"•".repeat(numInputs)}
     />
   )
 }
 
+/** Properties for Button function */
 type ButtonProps = {
   /** Function to be called on button click. */
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
@@ -262,6 +296,7 @@ type ButtonProps = {
 
 export function Button({ onClick, onClickPromised, disabled, Icon, text }: ButtonProps) {
   const [loading, setLoading] = useState(false)
+  if (onClick !== undefined && onClickPromised !== undefined) throw new Error('Both onClick and onClickPromised props cannot be defined at the same time.')
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (onClick) {

@@ -95,10 +95,10 @@ export const verifyAndSendOtp = asyncHandler (
   async (req, res, next) => {
     try {
       /* Fetching all required data */
-      const { field, value, fullname, to } = req.query
+      const { field, value, fullname } = req.query
 
       /* Check if the request body is valid */
-      if (!value || !to || !fullname) throw new ApiError(BAD_REQUEST, 'Invalid request body')
+      if (!value || !fullname) throw new ApiError(BAD_REQUEST, 'Invalid request body')
       else if (field === 'email' || field === 'phone') {
         const isUnique = await isUserExists(field, value as string)
         if (isUnique) {
@@ -106,8 +106,8 @@ export const verifyAndSendOtp = asyncHandler (
         }
         else {
           const name: string = (fullname as string) || 'user'
-          const otp = Math.floor(1000 + Math.random() * 9000); // Generate a 4-digit OTP
-
+          // const otp = Math.floor(1000 + Math.random() * 9000); // Generate a 4-digit OTP
+          const otp = (field === 'email') ? Math.floor(1000 + Math.random() * 9000) : 1234 // For testing purposes
           /* Store OTP in Redis Database */
           if (redis.status === 'ready') {
             await redis.set(`otps:${field}:${(value as string).replace(/\s+/g, '')}`, crypto.createHash('sha256').update(otp.toString()).digest('hex'), 'EX', 10*60)
@@ -119,20 +119,25 @@ export const verifyAndSendOtp = asyncHandler (
           }
 
           /* Making an event to send email to user */
-          setImmediate(async () => {
-            try {
-              await sendEmail({
-                to: to as string,
-                subject: emailVerificationTemplate.subject,
-                html: (emailVerificationTemplate.body as string)
-                .replace("[User's Name]", name)
-                .replace("[OTP Number]", otp.toString())
-              })
-            }
-            catch (err) {
-              logger.error('Error sending email', err)
-            }
-          })
+          if (field === 'email') {
+            setImmediate(async () => {
+              try {
+                await sendEmail({
+                  to: value.toString().trim(),
+                  subject: emailVerificationTemplate.subject,
+                  html: (emailVerificationTemplate.body as string)
+                  .replace("[User's Name]", name)
+                  .replace("[OTP Number]", otp.toString())
+                })
+              }
+              catch (err) {
+                logger.error('Error sending email', err)
+              }
+            })
+          }
+          else {
+            // Send SMS to user using setImmediate function (Needs implementation)
+          }
           res.status(OK).json(new ApiResponse(OK, [], `Unique ${field === 'email' ? 'email' : 'phone number'}!`))
         }
       }
