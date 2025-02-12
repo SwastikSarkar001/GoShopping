@@ -1,5 +1,6 @@
 import { useRef, useEffect, HTMLProps } from 'react'
-import useTheme from '../../hooks/useTheme'
+import { useAppDispatch, useAppSelector } from '../../states/store'
+import { toggleTheme } from '../../states/reducers/themeSlice'
 
 type togglerProps = {
 	className?: HTMLProps<HTMLElement>['className']
@@ -11,7 +12,8 @@ type togglerProps = {
  */
 export default function ThemeToggler({ className }: togglerProps) {
 	const toggleRef = useRef<HTMLInputElement>(null)
-	const { theme, toggleTheme } = useTheme()
+	const theme = useAppSelector(state => state.theme.theme)
+	const dispatch = useAppDispatch()
 
 	useEffect(() => {
 		if (theme === 'dark') {
@@ -27,7 +29,7 @@ export default function ThemeToggler({ className }: togglerProps) {
 				Switch to {(theme === 'dark') ? 'light' : 'dark'} mode
 			</div>
 			<label className="switch">
-				<input ref={toggleRef} type="checkbox" onClick={toggleTheme} />
+				<input ref={toggleRef} type="checkbox" onClick={() => dispatch(toggleTheme())} />
 				<span className="slider" />
 			</label>
 		</div>

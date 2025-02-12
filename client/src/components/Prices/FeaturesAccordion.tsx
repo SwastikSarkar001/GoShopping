@@ -1,6 +1,6 @@
 import { useState } from "react"
 import details from "../Features/FeatureDetails"
-import useTheme from "../../hooks/useTheme"
+import { useAppSelector } from "../../states/store"
 
 type FeaturesAccordionProps = {
   checkedFeatures: { [key: string]: boolean }
@@ -13,7 +13,7 @@ export default function FeaturesAccordion(props: FeaturesAccordionProps) {
     setOpenIndex(prev => !prev)
   }
 
-  const {theme} = useTheme()
+  const theme = useAppSelector(state => state.theme.theme)
 
   return (
     <div className="md:mx-32 mt-4">

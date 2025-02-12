@@ -1,7 +1,7 @@
 import { UNAUTHORIZED } from 'constants/http';
 import { Request, Response, NextFunction } from 'express';
 import ApiError from 'utils/ApiError';
-import { AccessTokenSignOptions, RefreshTokenSignOptions, verifyToken } from 'utils/jwt';
+import { AccessTokenPayload, AccessTokenSignOptions, RefreshTokenPayload, RefreshTokenSignOptions, verifyToken } from 'utils/jwt';
 
 /**
  * Middleware to protect routes that require a valid access token.
@@ -22,7 +22,7 @@ export const accessProtectedRoute = (req: Request, res: Response, next: NextFunc
     const accessToken = (req?.cookies["access_token"] as string) || (req.headers['authorization']?.split(' ')[1])
     if (accessToken) {
       try {
-        const data = verifyToken(accessToken, AccessTokenSignOptions)
+        const data = verifyToken(accessToken, AccessTokenSignOptions) as AccessTokenPayload
         req.body.verifiedData = data
         next()
       }
@@ -57,7 +57,7 @@ export const refreshProtectedRoute = (req: Request, res: Response, next: NextFun
     const refreshToken = (req?.cookies["refresh_token"] as string) || (req.headers['authorization']?.split(' ')[1])
     if (refreshToken) {
       try {
-        const data = verifyToken(refreshToken, RefreshTokenSignOptions)
+        const data = verifyToken(refreshToken, RefreshTokenSignOptions) as RefreshTokenPayload
         req.body.verifiedData = data
         next()
       }

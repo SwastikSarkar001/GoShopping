@@ -36,7 +36,12 @@ export type windowSizesType = {
 type User = AuthContextType | null
 
 interface AuthContextType {
-  isAuthenticated: boolean;
-  displayName?: string,
-  profilePic?: string
+  // isAuthenticated: boolean;
+  // displayName?: string,
+  // profilePic?: string
+  user: User | null,
+  loading: boolean,
+  signIn: (data: UserSignInType) => Promise<void>,
+  signUp: (data: UserCredentialsType) => Promise<void>,
+  signOut: () => void
 }

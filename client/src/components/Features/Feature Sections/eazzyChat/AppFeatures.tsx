@@ -1,8 +1,8 @@
-import useTheme from "../../../../hooks/useTheme"
 import { IoShieldHalfSharp } from "react-icons/io5"
 import { IoChatbubbleEllipses } from "react-icons/io5"
 import { FcOpenedFolder } from "react-icons/fc";
 import { FcMultipleDevices } from "react-icons/fc";
+import { useAppSelector } from "../../../../states/store";
 
 const details = [{
     title: "Secure and Reliable Communication",
@@ -24,7 +24,7 @@ const details = [{
 ]
 
 export default function AppFeatures() {
-  const { theme } = useTheme()
+  const theme = useAppSelector(state => state.theme.theme)
   return (
     <section className="text-text py-32 px-16 flex flex-wrap items-stretch justify-center place-items-center text-center gap-16">
       {

@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, useEffect } from 'react'
 
 const HomePage = lazy(() => import('./Landing Page/HomePage'))
 const Features = lazy(() => import('./Features/Features'))
@@ -9,8 +9,9 @@ const Dashboard = lazy(() => import('./Dashboard/Dashboard'))
 
 import { Toaster } from 'sonner'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import ThemeProvider from "../contexts/ThemeProvider"
 import Pricing from './Prices/Pricing'
+import { useAppDispatch, useAppSelector } from '../states/store'
+import { getInitUserProfile } from '../states/reducers/userSlice'
 
 const router = createBrowserRouter([{
       path: '/',
@@ -40,15 +41,32 @@ const router = createBrowserRouter([{
       v7_partialHydration: true,
       v7_relativeSplatPath: true,
       v7_skipActionErrorRevalidation: true,
+      v7_startTransition: true
     }
   }
 )
 
 export default function App() {
+  const theme = useAppSelector(state => state.theme.theme)
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    }
+    else {
+      document.body.classList.remove('dark')
+      localStorage.setItem('theme', '')
+    }
+  }, [theme])
+
+  window.onload = () => dispatch(getInitUserProfile())
+
   return (
-    <ThemeProvider>
-      <RouterProvider router={router} future={{v7_startTransition: true}} />
-      <Toaster position='top-center' richColors closeButton />
-    </ThemeProvider>
+    <>
+      <RouterProvider router={router} />
+      <Toaster position='top-center' richColors closeButton duration={6000} />
+    </>
   )
 }

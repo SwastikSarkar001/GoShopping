@@ -2,10 +2,10 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import axios from "axios"
 import { Button, InputOTP, InputPhone } from "../InputElements"
-import { signUpFormProps } from "../SignUpForm"
+import { signUpFormPagesProps } from "../SignUpForm"
 import { isValidPhoneNumber } from "react-phone-number-input"
 
-type PhoneVerificationProps = signUpFormProps & {
+type PhoneVerificationProps = signUpFormPagesProps & {
   /** Phone number that has been saved in the client */
   savedPhone: string | null
   /** Set the phone number that has been saved in the client */

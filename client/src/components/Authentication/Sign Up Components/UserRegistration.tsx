@@ -1,8 +1,8 @@
 import { UserSVG } from "../Icons";
 import { InputText } from "../InputElements";
-import { signUpFormProps } from "../SignUpForm";
+import { signUpFormPagesProps } from "../SignUpForm";
 
-export default function UserRegistration({data, changeData}: signUpFormProps) {
+export default function UserRegistration({data, changeData}: signUpFormPagesProps) {
   return (
     <div className='flex flex-col gap-4'>
       <InputText

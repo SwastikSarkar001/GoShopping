@@ -1,7 +1,7 @@
 import { InputPassword } from "../InputElements";
-import { signUpFormProps } from "../SignUpForm";
+import { signUpFormPagesProps } from "../SignUpForm";
 
-export default function UserPasswordSetup({data, changeData}: signUpFormProps) {
+export default function UserPasswordSetup({data, changeData}: signUpFormPagesProps) {
   return (
     <div className='flex flex-col gap-4'>
       <InputPassword

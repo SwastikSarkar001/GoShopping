@@ -54,10 +54,12 @@ type InputProps = {
   required?: boolean
   /** The pattern to validate the input. */
   pattern?: string
+  /** The suggestions to be displayed in the input. */
+  suggestions?: string[]
 }
 
 /** Renders a text input with an id, label and optional logo. */
-export function InputText({ label, id, name, Logo, data, changeData, required, pattern }: InputProps) {
+export function InputText({ label, id, name, Logo, data, changeData, required, pattern, suggestions }: InputProps) {
   return (
     <label htmlFor={ id } className="bg-gray-300/20 invalid:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
       <input
@@ -70,7 +72,15 @@ export function InputText({ label, id, name, Logo, data, changeData, required, p
         onChange={ changeData }
         pattern={ pattern }
         required={ required }
+        list={ suggestions ? `${id}-list` : undefined }
       />
+      {suggestions && (
+        <datalist id={`${id}-list`}>
+          {suggestions.map((suggestion, index) => (
+            <option key={index} value={suggestion} />
+          ))}
+        </datalist>
+      )}
       { Logo }
     </label>
   )
@@ -316,7 +326,7 @@ export function Button({ onClick, onClickPromised, disabled, Icon, text }: Butto
   }
   return (
     <button
-      className='disabled:bg-gray-400 disabled:cursor-not-allowed bg-black hover:bg-blue-500 cursor-pointer transition-colors text-white font-bold p-4 rounded-2xl flex items-center justify-center gap-3'
+      className='disabled:bg-gray-400 disabled:cursor-not-allowed bg-black hover:bg-blue-500 focus-within:bg-blue-500 cursor-pointer transition-colors text-white font-bold p-4 rounded-2xl flex items-center justify-center gap-3'
       onClick={handleClick}
       disabled={disabled || loading}
     >

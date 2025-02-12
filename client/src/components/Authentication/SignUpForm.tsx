@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useState, useReducer, useEffect } from 'react'
-import { toast } from 'sonner'
+import { useState } from 'react'
 import StepNavigator from './Sign Up Components/StepNavigator'
 import UserRegistration from './Sign Up Components/UserRegistration'
 import EmailVerification from './Sign Up Components/EmailVerification'
@@ -8,37 +7,10 @@ import UserPasswordSetup from './Sign Up Components/UserPasswordSetup'
 import PhoneNumberVerification from './Sign Up Components/PhoneNumberVerification'
 import UserLocation from './Sign Up Components/UserLocation'
 import UserConsent from './Sign Up Components/UserConsent'
-
-type UserCredentialsType = {
-  fname: string
-  mname: string
-  lname: string
-  email: string
-  password: string
-  confirm: string
-  phone: string
-  city: string
-  state: string
-  country: string
-}
-
-const initialState: UserCredentialsType = {
-  fname: '',
-  mname: '',
-  lname: '',
-  email: '',
-  password: '',
-  confirm: '',
-  phone: '',
-  city: '',
-  state: '',
-  country: ''
-}
-
-type dispatchType = {
-  type: 'fname' | 'mname' | 'lname' | 'email' | 'password' | 'confirm' | 'phone' | 'city' | 'state' | 'country' | 'reset'
-  value: string
-}
+import { signUpDispatchType, UserCredentialsType } from './AuthenticationPage'
+import { useAppDispatch } from '../../states/store'
+import { createUserAccount } from '../../states/reducers/userSlice'
+import { toast } from 'sonner'
 
 /**
  * Determines whether the current step in the sign-up process should be blocked based on the provided user credentials.
@@ -70,67 +42,80 @@ function blocker(step: number, data: UserCredentialsType): boolean {
     case 5:
       return data.city.trim() === '' || data.state.trim() === '' || data.country.trim() === ''
     case 6:
-      return false
+      return false // Intentionally set to false to allow custom state logic for submission of form
     default:
       return true
   }
 }
 
-export type signUpFormProps = {
+export type signUpFormPagesProps = {
   /** The user data of Registration Form */
   data: UserCredentialsType,
   /** Function to change the data in the form */
-  changeData: (type: dispatchType['type'], value: string) => void
+  changeData: (type: signUpDispatchType['type'], value: string) => void
 }
 
-export default function SignUpForm() {
-  // User credentials state and dispatch function for updating the state
-  const [userCredentials, dispatch] = useReducer(
-    (state: UserCredentialsType, action: dispatchType) => {
-      switch (action.type) {
-        case 'fname':
-          return { ...state, fname: action.value }
-        case 'mname':
-          return { ...state, mname: action.value }
-        case 'lname':
-          return { ...state, lname: action.value }
-        case 'password':
-          return { ...state, password: action.value }
-        case 'confirm':
-          return { ...state, confirm: action.value }
-        case 'email':
-          return { ...state, email: action.value }
-        case 'phone':
-          return { ...state, phone: action.value }
-        case 'city':
-          return { ...state, city: action.value }
-        case 'state':
-          return { ...state, state: action.value }
-        case 'country':
-          return { ...state, country: action.value }
-        case 'reset':
-          return initialState
-        default:
-          return state
-      }
-    },
-    initialState
-  )
-  const changeData = (type: dispatchType['type'], value: string) => {
+type signUpFormProps = {
+  /** Toggler to swich to Sign In Form */
+  openSignIn: () => void
+  /** User Sign Up Credentials */
+  userCredentials: UserCredentialsType
+  /** Function to dispatch the user credentials */
+  dispatch: (dispatchObj: signUpDispatchType) => void
+  /** Array State to hold the saved values during verification of user data */
+  savedData: (string | null)[]
+  /** Function to update the saved data */
+  setSavedData: React.Dispatch<React.SetStateAction<(string | null)[]>>
+  /**
+   * Array State to check whether the verification of a particular data has succeeded or not
+   * and if verification is successful then disable all of the related fields
+   */
+  disableAll: boolean[]
+  /** Function to update the disabled state */
+  setDisableAll: React.Dispatch<React.SetStateAction<boolean[]>>
+  otpValue: string[]
+  setOtpValue: React.Dispatch<React.SetStateAction<string[]>>
+  allChecked: boolean
+  setAllChecked: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export default function SignUpForm({
+  openSignIn,
+  userCredentials,
+  dispatch,
+  savedData,
+  setSavedData,
+  disableAll,
+  setDisableAll,
+  otpValue,
+  setOtpValue,
+  allChecked,
+  setAllChecked
+}: signUpFormProps) {
+  const changeData = (type: signUpDispatchType['type'], value: string) => {
     dispatch({ type: type, value: value })
   }
 
   const navigate = useNavigate()
-  const sampleFn = (e: React.FormEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    navigate('/')
-    toast.success('Sign in successful')
+  const dispatchUser = useAppDispatch()
+  const submitFunction = async (e: React.FormEvent<HTMLButtonElement>) => {
+    try {
+      e.preventDefault()
+      
+      const createUser = dispatchUser(createUserAccount(userCredentials)).unwrap()
+      toast.promise(createUser, {
+        loading: 'Creating your account...',
+        success: () => {
+          navigate('/features', { replace: true })
+          return 'Registration successful! You are now a part of eazzyBizz family.'
+        },
+        error: (error) => `Registration failed! ${ error.message }`,
+      })
+      // useCreateUserAfterRegistration(userCredentials)
+    } catch (error) {
+      console.error(error)
+    }
   }
-
-  // OTP state and dispatch function for updating the state
-  const [savedData, setSavedData] = useState<(string | null)[]>([null, null])
-  const [disableAll, setDisableAll] = useState([false, false])
-  const [otpValue, setOtpValue] = useState(['', ''])
 
   /** Update the email field in the form */
   const updateEmail = (value: string | null) => {
@@ -189,7 +174,7 @@ export default function SignUpForm() {
   /** Number of inputs in the OTP field */
   const numInputs = 4
 
-  /** Manage the steps and block pages */
+  /** Contains the Page Components of various steps */
   const stepPages = [
     <UserRegistration data={ userCredentials } changeData={ changeData } />,
     <EmailVerification
@@ -216,15 +201,10 @@ export default function SignUpForm() {
       setDisableAll={ disablePhoneField }
     />,
     <UserLocation data={ userCredentials } changeData={ changeData } />,
-    <UserConsent data={ userCredentials } changeData={ changeData } />
+    <UserConsent setAllChecked={ setAllChecked } />
   ]
   const [step, setStep] = useState(1)
   const totalSteps = stepPages.length
-  // const [blockPages, setBlockPages] = useState(Array.from({ length: totalSteps }, () => true))
-  
-  useEffect(() => {
-    console.log(userCredentials)
-  }, [userCredentials])
   
   return (
     <div className='bg-white rounded-2xl flex flex-col items-center justify-center relative h-full'>
@@ -236,14 +216,17 @@ export default function SignUpForm() {
         </div>
         { stepPages[step - 1] }
         <StepNavigator
-          blockPage={blocker(step, userCredentials) || (step === 2 && !disableAll[0]) || (step === 4 && !disableAll[1])}
+          blockPage={
+            blocker(step, userCredentials) || (step === 2 && !disableAll[0]) || (step === 4 && !disableAll[1]) || (step === 6 && !allChecked)
+          }
           currentStep={step}
           setStep={setStep}
           totalSteps={totalSteps}
-          submitFunc={sampleFn}
+          submitFunc={submitFunction}
         />
       </form>
-      <p className="text-gray-400 mt-4">
+      <p className="md:hidden md:pointer-events-none text-gray-400 mt-4">
+        Already have an account? <button onClick={ openSignIn } className="text-blue-500 hover:underline active:text-purple-500">Sign In</button>
       </p>
     </div>
   )

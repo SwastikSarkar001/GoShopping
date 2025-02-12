@@ -91,7 +91,7 @@ export const isUserExists = async (field: 'email' | 'phone', value: string): Pro
 /**
  * 
  */
-export const verifyAndSendOtp = asyncHandler (
+export const verifyFieldAndSendOtp = asyncHandler (
   async (req, res, next) => {
     try {
       /* Fetching all required data */

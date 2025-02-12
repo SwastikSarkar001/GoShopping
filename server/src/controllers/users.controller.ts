@@ -12,6 +12,7 @@ import UserSchema from 'models/user.model'
 import SessionSchema from 'models/session.model'
 import { ZodError } from 'zod'
 import { isUserExists } from './utils.controller'
+import { ResultSetHeader } from 'mysql2'
 
 
 export const addUser = asyncHandler (
@@ -118,8 +119,18 @@ export const addUser = asyncHandler (
       /* If user data is invalid then throw an error */
       catch (error) {
         if (error instanceof ZodError) {
+          const [firstIssue] = error.errors
           logger.error('Invalid user data sent from client')
-          throw new ApiError(BAD_REQUEST, 'Invalid user data', error.errors)
+          if (firstIssue) {
+            const { path, message } = firstIssue
+            const paths = path.join('.')
+            const issueMsg = paths ? `${paths}: ${message}` : message
+            logger.error(JSON.stringify(error.errors))
+            throw new ApiError(BAD_REQUEST, `Invalid user data. ${issueMsg}`, error.errors)
+          }
+          else {
+            throw new ApiError(BAD_REQUEST, 'Invalid user data', error.errors)
+          }
         }
         else if (error instanceof ApiError) {
           throw error
@@ -128,17 +139,6 @@ export const addUser = asyncHandler (
           throw error
         }
       }
-    }
-    catch (err) {
-      next(err)
-    }
-  }
-)
-
-export const deleteUser = asyncHandler (
-  async (req, res, next) => {
-    try {
-      res.status(NO_CONTENT)
     }
     catch (err) {
       next(err)
@@ -256,11 +256,10 @@ export const signIn = asyncHandler (
   async (req, res, next) => {
     try {
       // Get the user data from the request body and validate
-      const userdata = UserSchema.pick({
-          email: true,
-          password: true
-        }
-      ).parse(req.body)
+      const userdata = {
+        email: req.body.email,
+        password: req.body.password
+      }
 
       // Check if the user exists in the database
       const results = await sqlQuery(`CALL signIn(?, ?)`, [userdata.email, userdata.password])
@@ -341,16 +340,90 @@ export const signOut = asyncHandler (
   async (req, res, next) => {
     try {
       // Get the session id from the request body and validate
-      const data = req.body
+      const data = req.body.verifiedData
 
       // Check if the session exists in the database
-      const results = await sqlQuery(`CALL signOut(?)`, [data.sessionid])
-      if (results instanceof Array) {
-        const [result] = results[0] as any[]
+      const results = await sqlQuery(`CALL signOut(?)`, [data.sessionid]) as ResultSetHeader
+      if (results  === undefined) throw new ApiError(UNAUTHORIZED, 'Session not found')
+      redis.status === 'ready' &&
+      await redis.del(`sessions:${data.sessionid}`)
+      res
+        .status(NO_CONTENT)
+        .clearCookie('access_token')
+        .clearCookie('refresh_token')
+        .send()
+    }
+    catch (err) {
+      next(err)
+    }
+  }
+)
+
+export const getUserData = asyncHandler (
+  async (req, res, next) => {
+    try {
+      // Get the user data from the request body and validate
+      const data = req.body.verifiedData as AccessTokenPayload
+
+      let userdata, sessiondata
+
+      /* Redis is ready to respond */
+      if (redis.status === 'ready') {
+        userdata = JSON.parse(await redis.call('JSON.GET', `users:${data.userid}`) as string)
+        sessiondata = JSON.parse(await redis.call('JSON.GET', `sessions:${data.sessionid}`) as string)
+        if (userdata && sessiondata) {
+          await redis
+            .pipeline()
+            .expire(`users:${data.userid}`, 7*24*3600)
+            .expire(`sessions:${data.sessionid}`, 7*24*3600)
+            .exec()
+
+          const returnUserData = {
+            firstname: userdata.firstname,
+            middlename: userdata.middlename,
+            lastname: userdata.lastname,
+            email: userdata.email,
+            phone: userdata.phone,
+            city: userdata.city,
+            state: userdata.state,
+            country: userdata.country
+          }
+          res.status(OK).json(new ApiResponse(OK, [returnUserData], 'User data retrieved successfully'))
+          return
+        }
+      }
+      const sqlRes = await sqlQuery(`CALL getUserAndSessionData(?)`, [data.sessionid])
+      if (sqlRes instanceof Array) {
+        const [result] = sqlRes[0] as any[]
         if (result === undefined) throw new ApiError(UNAUTHORIZED, 'Session not found')
-        redis.status === 'ready' &&
-        await redis.del(`sessions:${data.sessionid}`)
-        res.status(NO_CONTENT).send()
+        const returnUserData = {
+          firstname: result.firstname,
+          middlename: result.middlename,
+          lastname: result.lastname,
+          email: result.email,
+          phone: result.phone,
+          city: result.city,
+          state: result.state,
+          country: result.country
+        }
+        const sessionData = {
+          userid: data.userid,
+          useragent: result.clientdata,
+          expires: result.expires
+        }
+        try {
+          await redis
+            .pipeline()
+            .call('JSON.SET', `users:${data.userid}`, '$', JSON.stringify(returnUserData))
+            .expire(`users:${data.userid}`, 7*24*3600)
+            .call('JSON.SET', `sessions:${data.sessionid}`, '$', JSON.stringify(sessionData))
+            .expire(`sessions:${data.sessionid}`, 7*24*3600)
+            .exec()
+        }
+        catch {
+          logger.error('Problem caching user and session data in Redis')
+        }
+        res.status(OK).json(new ApiResponse(OK, [returnUserData], 'User data retrieved successfully'))
       }
       else {
         throw new ApiError(UNAUTHORIZED, 'Session not found')
@@ -361,48 +434,3 @@ export const signOut = asyncHandler (
     }
   }
 )
-
-// export async function getUsers() {
-  // const resultsinfo = initialResult
-  // try {
-  //   const results = await query(`select username, firstname, middlename, lastname, email, phone, city, state, country from users`)
-  //   resultsinfo.message = 'Users fetched successfully'
-  //   resultsinfo.status = OK
-  //   resultsinfo.result = results
-  // }
-  // catch (err) {
-  //   console.error(err)
-  //   resultsinfo.message = 'No users found'
-  //   resultsinfo.status = NOT_FOUND
-  // }
-  // finally {
-  //   return resultsinfo
-  // }
-// }
-
-// type signinType = {
-//   username: string,
-//   password: string
-// }
-
-// export async function signIn(userdata: signinType) {
-  // const resultsinfo = initialResult
-  // try {
-
-  //   const result = await query(`select * from users where username = ? and password = ?`, [userdata.username, userdata.password])
-  //   // If successful then implement sessions using JWT
-  //   if (result === undefined) throw new Error()
-  //   resultsinfo.message = 'Users fetched successfully'
-  //   resultsinfo.status = OK
-  //   resultsinfo.result = result
-  // }
-  // catch (err) {
-  //   console.error(err)
-  //   resultsinfo.message = 'No users found'
-  //   resultsinfo.status = NOT_FOUND
-  // }
-  // finally {
-  //   return resultsinfo
-  // }
-// }
-

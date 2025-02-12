@@ -4,12 +4,13 @@ import { navbar } from '../../types'
 import sectionsInfo from './sectiondata'
 import { large } from '../../../windowSizes'
 import ThemeToggler from '../Utilities/ThemeToggler'
-import useTheme from '../../hooks/useTheme'
 import { Link } from 'react-router-dom'
 import { RxOpenInNewWindow } from "react-icons/rx";
+import { useAppDispatch, useAppSelector } from '../../states/store'
+import { toggleTheme } from '../../states/reducers/themeSlice'
 
 export default function Navbar(props: navbar) {
-	const { theme } = useTheme()
+	const theme = useAppSelector(state => state.theme.theme)
 
 	/* Tracking options box on different screens */
 	const [optionsClicked, setOptionsClicked] = useState(false)  // By default it is hidden
@@ -126,7 +127,8 @@ type msopts = {
 }
 
 function MediumScreenOpts(props: msopts) {
-	const { theme, toggleTheme } = useTheme()
+	const theme = useAppSelector(state => state.theme.theme)
+	const dispatch = useAppDispatch()
 	const mediumScreenRefs = useMemo(
     () => sectionsInfo.map(() => createRef<HTMLDivElement>()),
     []
@@ -144,7 +146,7 @@ function MediumScreenOpts(props: msopts) {
 	})
 
 	const setTheme = () => {
-		toggleTheme()
+		dispatch(toggleTheme())
 		props.setClicked()
 	}
 

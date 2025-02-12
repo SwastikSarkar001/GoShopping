@@ -7,7 +7,7 @@ import FAQs from "./FAQs"
 import CTA from "./CTA"
 import Footer from "../../../Utilities/Footer"
 import { useAnimation } from "framer-motion";
-import useTheme from "../../../../hooks/useTheme";
+import { useAppSelector } from "../../../../states/store";
 // import { useNavigate } from 'react-router-dom'
 
 export default function ChatApp() {
@@ -22,7 +22,7 @@ export default function ChatApp() {
   }
   
   window.onscroll = handleScroll
-  const { theme } = useTheme()
+  const theme = useAppSelector(state => state.theme.theme)
   const ref = useRef<HTMLDivElement>(null)
   /* For filling background */
 	const controls = useAnimation();

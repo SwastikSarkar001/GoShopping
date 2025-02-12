@@ -2,9 +2,9 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import axios from "axios"
 import { InputEmail, Button, InputOTP } from "../InputElements"
-import { signUpFormProps } from "../SignUpForm"
+import { signUpFormPagesProps } from "../SignUpForm"
 
-type EmailVerificationProps = signUpFormProps & {
+type EmailVerificationProps = signUpFormPagesProps & {
   /** Email address that has been saved in the client */
   savedEmail: string | null
   /** Set the email address that has been saved in the client */

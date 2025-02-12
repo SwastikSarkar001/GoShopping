@@ -14,7 +14,7 @@ type NavigatorProps = {
   totalSteps: number
 
   /** Function to execute when the form is submitted */
-  submitFunc: (e: React.FormEvent<HTMLButtonElement>) => void
+  submitFunc: (e: React.FormEvent<HTMLButtonElement>) => Promise<void>
 }
 
 export default function StepNavigator({blockPage, currentStep, setStep, totalSteps, submitFunc}: NavigatorProps) {
@@ -58,7 +58,7 @@ export default function StepNavigator({blockPage, currentStep, setStep, totalSte
       {
         isLastPage ?
         <Button
-          onClick={submitFunc}
+          onClickPromised={submitFunc}
           text='Sign In'
           disabled={blockPage}
           Icon={

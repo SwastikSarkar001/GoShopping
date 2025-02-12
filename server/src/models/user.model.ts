@@ -4,7 +4,6 @@ import { passwordStrength } from 'check-password-strength'
 
 const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance()
 
-
 const UserSchema = z.object({
   userid: z
     .number()
@@ -46,14 +45,15 @@ const UserSchema = z.object({
   country: z.string().describe('The country of residence of the user'),
   password: z
     .string()
-    .min(8, { message: 'Password must be at least 8 characters long' })
+    .min(10, { message: 'Password must be at least 10 characters long' })
     .refine(
       password => {
         const data = passwordStrength(password)
-        return data.id === 3 && data.contains.length === 4
-      }, { message: 'Password must contain an uppercase letter, a lowercase letter, a digit and a special symbol' }
+        return data.id >= 2 && data.contains.length === 4
+      },
+      { message: 'Password must include at least one uppercase letter, one lowercase letter, one digit, and one special character.' }
     )
-    .describe('The password of the user, must be more than 8 characters long and must contain an uppercase letter, a lowercase letter, a digit and a special symbol'),
+    .describe('The password of the user, must be more than 10 characters long and must contain an uppercase letter, a lowercase letter, a digit and a special symbol'),
 })
 
 export default UserSchema

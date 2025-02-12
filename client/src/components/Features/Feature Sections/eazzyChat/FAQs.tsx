@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import useTheme from '../../../../hooks/useTheme'
+import { useAppSelector } from '../../../../states/store'
 
 const qna = [{
     question: 'What is eazzyChat?',
@@ -39,7 +39,7 @@ export default function FAQs() {
   const toggleAccordion = (index: number) => {
     setOpenIndex(prev => prev.map((_, i) => i === index ? !prev[i] : false))
   }
-  const { theme } = useTheme()
+  const theme = useAppSelector(state => state.theme.theme)
   return (
     <section className='text-text md:px-24 text-center'>
       <h1 className='font-source-serif text-6xl font-extrabold px-8 md:px-0'>Frequently Asked Questions (FAQs)</h1>
