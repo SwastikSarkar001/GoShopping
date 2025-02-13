@@ -11,6 +11,7 @@ import { signUpDispatchType, UserCredentialsType } from './AuthenticationPage'
 import { useAppDispatch } from '../../states/store'
 import { createUserAccount } from '../../states/reducers/userSlice'
 import { toast } from 'sonner'
+import { passwordStrength } from 'check-password-strength'
 
 /**
  * Determines whether the current step in the sign-up process should be blocked based on the provided user credentials.
@@ -36,7 +37,14 @@ function blocker(step: number, data: UserCredentialsType): boolean {
     case 2:
       return false // Intentionally set to false to allow logic for email verification
     case 3:
-      return data.password.trim() === '' || data.confirm.trim() === '' || data.password.trim() !== data.confirm.trim()
+      return (
+        data.password === '' ||
+        data.confirm === '' ||
+        data.password.length < 10 ||
+        passwordStrength(data.password).id < 2 ||
+        passwordStrength(data.password).contains.length !== 4 ||
+        data.password !== data.confirm
+      )
     case 4:
       return false // Intentionally set to false to allow logic for phone verification
     case 5:
@@ -203,7 +211,7 @@ export default function SignUpForm({
     <UserLocation data={ userCredentials } changeData={ changeData } />,
     <UserConsent setAllChecked={ setAllChecked } />
   ]
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(3)
   const totalSteps = stepPages.length
   
   return (

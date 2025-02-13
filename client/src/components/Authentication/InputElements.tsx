@@ -111,7 +111,7 @@ export function InputPassword({id, name, label, data, autocomplete, changeData, 
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500']
   const strength = passwordStrength(data)
   return (
-    <>
+    <div className='flex flex-col gap-2 items-stretch'>
       <label htmlFor={id} className="bg-gray-300/20 p-4 rounded-2xl flex items-center gap-4">
         <input
           type={`${visible ? 'text' : 'password'}`}
@@ -128,9 +128,15 @@ export function InputPassword({id, name, label, data, autocomplete, changeData, 
       </label>
       {
         requirePasswordStrength &&
-        <div className="text-gray-400 text-sm">
-          {/* Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character. */}
-          <div className="grid grid-cols-4 gap-1">
+        <div className="text-gray-400 text-[0.875rem] leading-[1.25]">
+          {
+            (data.trim() === '' ||
+            data.length >= 10 &&
+            strength.id >= 2 &&
+            strength.contains.length === 4) ||
+            <div className="text-red-600 mb-2">Password must be atleast 10 characters long and contain atleast one uppercase letter, one lowercase letter, one number, and one special character.</div>
+          }
+          <div className="grid grid-cols-4 gap-1 mb-2">
             <div className={`h-[4px] rounded-md ${(strength.id >= 0 && data !== '') ? strengthColors[strength.id] : 'bg-gray-400'}`}></div>
             <div className={`h-[4px] rounded-md ${strength.id >= 1 ? strengthColors[strength.id] : 'bg-gray-400'}`}></div>
             <div className={`h-[4px] rounded-md ${strength.id >= 2 ? strengthColors[strength.id] : 'bg-gray-400'}`}></div>
@@ -138,7 +144,7 @@ export function InputPassword({id, name, label, data, autocomplete, changeData, 
           </div>
         </div>
       }
-    </>
+    </div>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useReducer, useState } from "react"
+import { useEffect, useReducer, useState } from "react"
 import { Link } from 'react-router-dom'
 import SignInForm from "./SignInForm"
 import SignUpForm from "./SignUpForm"
@@ -151,6 +151,10 @@ export default function AuthenticationPage() {
     // Toggle the sign-up form visibility
     setOpenSignUp(prev => !prev)
   }
+
+  useEffect(() => {
+    document.title = openSignUp ? 'eazzyBizz | Register Now!' : 'eazzybizz | Sign in to continue!'
+  }, [openSignUp])
 
   return (
     <main className="flex items-center justify-center h-screen bg-white">

@@ -20,7 +20,7 @@ export default function Pricing() {
 
   useEffect(() => {
     document.title = 'Plans and Pricing | eazzyBizz'
-  })
+  }, [])
 
   const [checkedFeatures, setCheckedFeatures] = useState (
     details.map(detail => detail.featureID).reduce((acc, id) => {

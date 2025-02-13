@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import axios from "axios"
+import libphonenumber from 'google-libphonenumber'
 import { Button, InputOTP, InputPhone } from "../InputElements"
 import { signUpFormPagesProps } from "../SignUpForm"
-import { isValidPhoneNumber } from "react-phone-number-input"
 
 type PhoneVerificationProps = signUpFormPagesProps & {
   /** Phone number that has been saved in the client */
@@ -36,12 +36,21 @@ export default function PhoneNumberVerification({
   const [resendTimer, setResendTimer] = useState<number>(0)
   const [rejected, setRejected] = useState<boolean>(false)
   const [otpStatus, setOtpStatus] = useState<'none' | 'success' | 'error'>(disableAll ? 'success' : 'none');
+  const phoneutil = libphonenumber.PhoneNumberUtil.getInstance()
 
   /** Checks whenever user needs to resend the OTP */
   const resendOtp = resendTimer === 0
   
   /** Checks whether the phone field contains the same data as previously saved phone number or not */
   const isPhoneFieldUnchanged = savedPhone === data.phone
+  const isValidPhoneNumber = (phoneNumber: string) => {
+    try {
+      return phoneutil.isValidNumber(phoneutil.parse(phoneNumber))
+    }
+    catch {
+      return false
+    }
+  }
 
   /** Original verifyOtp (to be used later) */
   // const verifyOtp = async () => {
