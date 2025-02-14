@@ -13,6 +13,8 @@ import SessionSchema from 'models/session.model'
 import { ZodError } from 'zod'
 import { isUserExists } from './utils.controller'
 import { ResultSetHeader } from 'mysql2'
+import { sendEmail } from 'utils/Nodemailer'
+import { welcomeToEazzyBizzTemplate } from 'utils/Mails'
 
 
 export const addUser = asyncHandler (
@@ -90,6 +92,21 @@ export const addUser = asyncHandler (
           /* Generate the access and refresh tokens */
           const accessToken = generateAccessToken({ userid: userid, sessionid: sessionid })
           const refreshToken = generateRefreshToken({ sessionid: sessionid })
+
+          /* Send a welcome email message to the registered email */
+          setImmediate(async () => {
+            try {
+              await sendEmail({
+                to: userdata.email,
+                subject: welcomeToEazzyBizzTemplate.subject,
+                html: (welcomeToEazzyBizzTemplate.body as string)
+                .replace("[User's Name]", userdata.firstname + (userdata.middlename ? ' ' + userdata.middlename : '') + ' ' + userdata.lastname)
+              })
+            }
+            catch (err) {
+              logger.error('Error sending email', err)
+            }
+          })
 
           /* Send the response with the tokens */
           res

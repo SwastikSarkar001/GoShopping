@@ -100,8 +100,8 @@ export const verifyFieldAndSendOtp = asyncHandler (
       /* Check if the request body is valid */
       if (!value || !fullname) throw new ApiError(BAD_REQUEST, 'Invalid request body')
       else if (field === 'email' || field === 'phone') {
-        const isUnique = await isUserExists(field, value as string)
-        if (isUnique) {
+        const userExists = await isUserExists(field, value as string)
+        if (userExists) {
           throw new ApiError(CONFLICT, 'User already exists!')
         }
         else {
@@ -115,7 +115,7 @@ export const verifyFieldAndSendOtp = asyncHandler (
 
           /* Store OTP in MySQL Database */
           else {
-            await sqlQuery(`CALL storeOtp(?, ?, ?)`, [field, value, otp])
+            await sqlQuery(`CALL addOtp(?, ?, ?)`, [field, value, otp])
           }
 
           /* Making an event to send email to user */
@@ -170,29 +170,24 @@ export const verifyOtp = asyncHandler (
 
         /* OTP exists but hashes didn't match */
         else {
-          throw new ApiError(UNAUTHORIZED, 'Invalid OTP')
+          throw new ApiError(UNAUTHORIZED, 'Incorrect or invalid OTP')
         }
       }
 
-      /* If Redis is not ready then check from MySQL database (Needs improvement) */
+      /* If Redis is not ready then check from MySQL database */
       else {
-        console.log('Write the fallback code')
-        res.status(OK).json(new ApiResponse(OK, [], 'OTP not verified successfully :)'))
-        /*
-          1. Call the stored procedure to verify the OTP and return either 0 or 1 (0 for invalid and 1 for valid)
-          2. If the result is 1 OTP is already deleted from the database thus send a success response
-          3. If the result is 0 then send an unauthorized response
-        */
-
-        // const data = await sqlQuery(`CALL verifyOtp(?, ?, ?)`, [field, value, otp])
-        // if (data instanceof Array) {
-        //   const [result] = data[0] as any[]
-        //   if (result === undefined) throw new ApiError(UNAUTHORIZED, 'OTP not found in the database')
-        //   res.status(OK).json(new ApiResponse(OK, [], 'OTP verified successfully'))
-        // }
-        // else {
-        //   throw new ApiError(UNAUTHORIZED, 'Invalid OTP')
-        // }
+        const responseData = await sqlQuery('CALL deleteOtp(?, ?, ?)', [field, value, otp])
+        if (responseData instanceof Array) {
+          const [resData] = responseData[0] as any[]
+          if (resData === undefined) throw new ApiError(UNAUTHORIZED, 'Incorrect or invalid OTP')
+          const isVerified = Object.keys(resData)[0] as string
+          if (parseInt(isVerified))
+          res.status(OK).json(new ApiResponse(OK, [], 'OTP verified successfully'))
+          else throw new ApiError(UNAUTHORIZED, 'Incorrect or invalid OTP')
+        }
+        else {
+          throw new ApiError(UNAUTHORIZED, 'Incorrect or invalid OTP')
+        }
       }
     }
     catch (err) {
