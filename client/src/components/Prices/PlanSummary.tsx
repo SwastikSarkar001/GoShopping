@@ -109,7 +109,7 @@ export default function PlanSummary(props: PlanSummaryProps) {
   }, [])
   return (
     <div className=" mx-32 mt-4 text-center mb-auto">
-      <div className="m-8 mt-8 text-text font-source-serif text-4xl text-center">
+      <div className="m-8 text-text font-source-serif text-4xl text-center">
         Prices
       </div>
       <div>
