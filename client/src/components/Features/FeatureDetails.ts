@@ -4,10 +4,10 @@ import UpcomingFeatures from "./Feature Sections/UpcomingFeatures"
 /**
  * Represents the details of a feature in the shopping website.
  */
-type FeatureDetail = {
+export type FeatureDetail = {
   /**
    * Unique identifier for the feature.
-   * @example "feature-123"
+   * @example "feature023"
    */
   featureID: string;
 
@@ -30,22 +30,26 @@ type FeatureDetail = {
   sectionComponent: () => JSX.Element;
 
   /**
-   * Monthly price per user for the feature, in USD.
+   * Monthly price for the feature used by 1 user, in INR.
    * @example 9.99
    */
   price_per_user_per_month: number;
 
   /**
-   * Yearly price for the feature, in USD.
-   * @example 99.99
+   * The tier for the feature.
+   * The tiers are as follows:
+   * 1. Basic - upto 5 users
+   * 2. Standard - upto 10 users
+   * 3. Premium - upto 15 users
+   * 4. Advanced - upto 20 users
+   * 5. Enterprise - upto 25 users
+   * 6. Ultimate - upto 30 users
+   * 7. Supreme - upto 40 users
+   * 8. Elite - upto 50 users
+   * @example 100
+   * @default 0 (Not selected)
    */
-  price_yearly: number;
-
-  /**
-   * Enterprise price for the feature, in USD.
-   * @example 999.99
-   */
-  price_enterprise: number;
+  tier: number;
 }
 
 const details: FeatureDetail[] = [{
@@ -53,73 +57,64 @@ const details: FeatureDetail[] = [{
     title: 'eazzyChat',
     description: 'Enables real-time text and media communication between users.',
     sectionComponent: ChatApp,
-    price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    price_per_user_per_month: 0,
+    tier: 0
   }, {
     featureID: "eazzy-crm",
     title: "eazzyCRM",
     description: "Track and manage customer interactions and data throughout the customer lifecycle.",
     sectionComponent: UpcomingFeatures,
-    price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    price_per_user_per_month: 299,
+    tier: 0
   }, {
     featureID: "eazzy-hr",
     title: "eazzyHR",
     description: "Manage employee records, payroll, and benefits.",
     sectionComponent: UpcomingFeatures,
-    price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    price_per_user_per_month: 100,
+    tier: 0
   }, {
     featureID: "eazzy-books",
     title: "eazzyBooks",
     description: "Automate and streamline your order processing workflow.",
     sectionComponent: UpcomingFeatures,
-    price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    price_per_user_per_month: 199,
+    tier: 0
   }, {
     featureID: "eazzy-manufacturing",
     title: "eazzyManufacturing",
     description: "Plan, execute, and monitor projects efficiently.",
     sectionComponent: UpcomingFeatures,
-    price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    price_per_user_per_month: 100,
+    tier: 0
   }, {
     featureID: "inventory-management",
     title: "Inventory Management",
     description: "Manage your stock levels, orders, and suppliers efficiently.",
     sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    tier: 0
   }, {
     featureID: "sales-analytics",
     title: "Sales Analytics",
     description: "Analyze sales data to make informed business decisions.",
     sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    tier: 0
   }, {
     featureID: "financial-management",
     title: "Financial Management",
     description: "Manage your financial operations, including accounting, invoicing, and budgeting.",
     sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    tier: 0
   }, {
     featureID: "supply-chain-management",
     title: "Supply Chain Management",
     description: "Optimize your supply chain operations from procurement to delivery.",
     sectionComponent: UpcomingFeatures,
     price_per_user_per_month: 70,
-    price_yearly: 12*70,
-    price_enterprise: 999
+    tier: 0
   }
 ]
 

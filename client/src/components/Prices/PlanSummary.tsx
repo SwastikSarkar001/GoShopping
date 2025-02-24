@@ -1,112 +1,14 @@
-import { useEffect, useState, forwardRef } from "react"
-import details from "../Features/FeatureDetails"
-import axios from "axios"
-import getSymbolFromCurrency from "currency-symbol-map"
-
-type Currency = {
-  /** Country code of client */
-  name: string,
-  /** Conversion rate of INR to client's country's currency */
-  conversion: number
-}
-
-const initialCurrency = {
-  name: 'INR',
-  conversion: 1
-}
-
-interface CurrencyDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
-  amount: number,
-  currencyCode: string,
-  htmlprops?: React.HTMLAttributes<HTMLSpanElement>
-}
-
-const CurrencyDisplay = forwardRef<HTMLSpanElement, CurrencyDisplayProps>(({ amount, currencyCode, ...htmlprops }, ref) => {
-  return <span {...htmlprops} ref={ref}>{(amount.toFixed(2) !== '0.00') ? getSymbolFromCurrency(currencyCode.toUpperCase())+amount.toFixed(2) : 'Free'}</span>;
-})
+import { useEffect, useState } from "react"
+import { FeatureDetail } from "../Features/FeatureDetails"
+import { CurrencyDisplay } from "./Pricing"
+import { tierAndPriceCalculator } from "./utilities"
 
 type PlanSummaryProps = {
-  checkedFeatures: { [key: string]: boolean }
+  features: FeatureDetail[],
+  fetchingData: boolean
 }
 
-export default function PlanSummary(props: PlanSummaryProps) {
-  const [currency, setCurrency] = useState(initialCurrency)  // Client's currency name and conversion rate
-  const countryDataUrl = 'https://restcountries.com/v3.1/all?fields=cca2,currencies'; // Free (Without API key)
-  const primaryExchangeRatesUrl = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/inr.min.json'; // Free (Without API key)
-  const fallbackExchangeRatesUrl = 'https://latest.currency-api.pages.dev/v1/currencies/inr.min.json'; // Free (Without API key) - Backup
-  const [fetchingData, setFetchingData] = useState(false)   // To check if data is being fetched
-
-  useEffect(() => {
-    /* Using Geolocation to set client's currency name */
-    navigator.geolocation.getCurrentPosition(pos => {
-      const {latitude,longitude} = pos.coords
-
-      /* Based on client's coordinates find out Country Code in 2 letter format */
-      axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
-      .then (response => {
-        const country_code = response.data.address.country_code.toUpperCase()
-
-        /* Get the currency of the client's country and show prices after resolving this request */
-        axios.get(countryDataUrl)
-          .then(res => {
-            const countries: {cca2: string, currencies: {[key: string]: {[key: string]: string}}}[] = res.data
-            const country = countries.find(country => country.cca2 === country_code)
-            axios.get(primaryExchangeRatesUrl)
-              .then(r => {
-                if (country !== undefined) {
-                  const currencies = Object.keys(country.currencies)
-                  for(let i = 0; i < currencies.length; i++) {
-                    if (r.data.inr[currencies[i].toLowerCase()] !== undefined) {
-                      setCurrency({
-                        name: currencies[i],
-                        conversion: r.data.inr[currencies[i].toLowerCase()]
-                      })
-                      break
-                    }
-                  }
-                }
-              })
-              /* Requesting to a fallback URL if the promise rejects */
-              .catch(e => {
-                console.error(e)
-                axios.get(fallbackExchangeRatesUrl)
-                  .then(rr => {
-                    if (country !== undefined) {
-                      const currencies = Object.keys(country.currencies)
-                      for(let i = 0; i < currencies.length; i++) {
-                        if (rr.data.inr[currencies[i].toLowerCase()] !== undefined) {
-                          setCurrency({
-                            name: currencies[i],
-                            conversion: rr.data.inr[currencies[i].toLowerCase()]
-                          })
-                          break
-                        }
-                      }
-                    }
-                  })
-                  .catch(ee => {
-                    console.error(ee)
-                  })
-                  /* Showing prices */
-                  .finally(() => setFetchingData(true))
-              })
-              /* Showing prices */
-              .finally(() => setFetchingData(true))
-          })
-
-        // console.log('Finished')
-      })
-      .catch(err => {
-        console.error(err)
-      })
-    }, (e) => {
-      console.log(e)
-      console.log('Unable to get location')
-      console.log('Continuing with default currency')
-      setFetchingData(true)
-    })
-    // setFetchingData(true)
-  }, [])
+export default function PlanSummary({ features, fetchingData }: PlanSummaryProps) {
   return (
     <div className=" mx-32 mt-4 text-center mb-auto">
       <div className="m-8 text-text font-source-serif text-4xl text-center">
@@ -114,78 +16,208 @@ export default function PlanSummary(props: PlanSummaryProps) {
       </div>
       <div>
         <h2 className="mb-8 text-text text-3xl font-source-serif">Select the plan that suit your needs</h2>
-        <div className="grid lg:grid-cols-3 gap-8 text-text">
-          <SummaryWrapper fetchingData={fetchingData} currencyData={currency} title="Per User/Month Plan" checkedFeatures={props.checkedFeatures} />
-          <SummaryWrapper fetchingData={fetchingData} currencyData={currency} title="Yearly Plan" checkedFeatures={props.checkedFeatures} />
-          <SummaryWrapper fetchingData={fetchingData} currencyData={currency} title="Enterprise Plan" checkedFeatures={props.checkedFeatures} />
-        </div>
+        <PricingDetails features={features} fetchingData={fetchingData} />
       </div>
     </div>
   )
 }
 
+function PricingDetails({ features, fetchingData }: { features: FeatureDetail[], fetchingData: boolean }) {
+  const [billingType, setBillingType] = useState<'Monthly Plan' | 'Yearly Plan'>('Yearly Plan')
+  const openMonthlyPlan = () => setBillingType('Monthly Plan')
+  const openYearlyPlan = () => setBillingType('Yearly Plan')
+  return (
+    <div className="flex flex-col items-center w-full">
+      <div className="flex gap-2 p-2 bg-gray-400/30 w-max rounded-2xl">
+        <button
+          className={`${billingType === 'Monthly Plan' ? 'bg-background pointer-events-none' : 'bg-transparent cursor-pointer'} text-text font-source-serif text-lg px-4 py-2 rounded-xl [&:hover]:shadow-md [&:hover]:bg-background/70 [&:active]:bg-background [&:active]:scale-90 transition-all`}
+          onClick={openMonthlyPlan}
+        >
+          Monthly Plan
+        </button>
+        <button
+          className={`${billingType === 'Yearly Plan' ? 'bg-background pointer-events-none' : 'bg-transparent cursor-pointer'} text-text font-source-serif text-lg px-4 py-2 rounded-xl [&:hover]:shadow-md [&:hover]:bg-background/70 [&:active]:bg-background [&:active]:scale-90 transition-all`}
+          onClick={openYearlyPlan}
+        >
+          Yearly Plan<span className="ml-2 text-sm">10% off 💸</span>
+        </button>
+      </div>
+      <div className="flex flex-col gap-4 mt-8 w-1/2">
+        {
+          billingType === 'Monthly Plan' ?
+          <SummaryWrapper title={billingType} checkedFeatures={features} fetchingData={fetchingData} />
+          :
+          <SummaryWrapper title={billingType} checkedFeatures={features} fetchingData={fetchingData} />
+        }
+      </div>
+    </div>
+  )
+}
+
+
 type summaryProps = {
-  title: string,
-  checkedFeatures: { [key: string]: boolean }
-  currencyData: Currency,
+  title: 'Monthly Plan' | 'Yearly Plan',
+  checkedFeatures: FeatureDetail[],
   fetchingData: boolean
 }
 
-function SummaryWrapper(props: summaryProps) {
-  const [totalPrice, setTotalPrice] = useState(0)
+function SummaryWrapper({ title, checkedFeatures, fetchingData }: summaryProps) {
+  /** GST applied */
+  const gst = 18
+
+  /** Annual discount applied */
+  const annualDiscount = 10
+  
+  const [originalPrice, setOriginalPrice] = useState(0)  // Total original price of the features
+  const [discountedPrice, setDiscountedPrice] = useState(0)  // Total discounted price of the features
+
+  /** Total discounted price after applying annual discount (in INR) */
+  const totalDiscountedPrice = discountedPrice * (title === 'Monthly Plan' ? 1 : 1 - 0.01*annualDiscount)
+
+  /** Total original price after applying GST (in INR) */
+  const originalPayableAmount = originalPrice * (1 + 0.01*gst)
+
+  /** Total discounted price after applying annual discount and GST (in INR) */
+  const payableAmount = totalDiscountedPrice * (1 + 0.01*gst)
+
   useEffect(() => {
-    let value = 0
-    details.filter(detail => props.checkedFeatures[detail.featureID]).map(detail => {
-      value += props.title === 'Per User/Month Plan' ? detail.price_per_user_per_month : props.title === 'Yearly Plan' ? detail.price_yearly : detail.price_enterprise
-      return value
-  })
-    setTotalPrice(props.currencyData.conversion*value)
-  }, [props.checkedFeatures, props.title, props.currencyData])
+    let original_value = 0
+    let discounted_value = 0
+    checkedFeatures.filter(detail => detail.tier !== 0).map(detail => {
+      const { originalprice, price } = tierAndPriceCalculator(detail.tier, detail.price_per_user_per_month)
+      original_value += originalprice * (title === 'Monthly Plan' ? 1 : 12)
+      discounted_value += price * (title === 'Monthly Plan' ? 1 : 12)
+    })
+    setOriginalPrice(original_value)
+    setDiscountedPrice(discounted_value)
+  }, [checkedFeatures, title])
+
   return (
-    <div className="border-2 hover:border-cyan-500 transition-colors rounded-xl py-8 px-4 flex flex-col gap-8 items-center bg-background">
-      <h3 className="capitalize font-source-serif text-xl">{props.title}</h3>
+    <div className={`border-2 ${title === 'Monthly Plan' ? 'border-gray-400 bg-gray-400/[0.075]' : 'border-emerald-400 bg-emerald-400/[0.08]'} text-text transition-colors rounded-xl py-8 px-4 flex flex-col gap-8 items-center`}>
+      <h3 className="capitalize font-source-serif text-xl">{title}{title === 'Yearly Plan' ? ' (Additional 10% off)': ''}</h3>
       <div className="text-left px-2 w-full flex flex-col gap-2">
         {
-          details.filter(detail => props.checkedFeatures[detail.featureID]).length === 0 ? 
+          checkedFeatures.filter(detail => detail.tier !== 0).length === 0 ? 
             <div className="text-gray-500 text-center">No features selected</div>
           :
           <>
-            <h4 className="">Includes -</h4>
-            <div className="px-2 flex flex-col gap-2 items-stretch">
+            <h4 className="font-source-serif text-lg">Your Selected Features - </h4>
+            <div className="flex justify-between items-center gap-2 *:font-source-serif *:text-lg border-y border-gray-500 py-2 my-2">
+              <div className="">Features</div>
+              <div className="">Price</div>
+            </div>
+            <div className="flex flex-col gap-4 items-stretch">
               {
-                details.filter(detail => props.checkedFeatures[detail.featureID]).map((detail, index) => (
-                  <div className="flex justify-between items-center gap-2" key={index}>
-                  <div className="leading-4">{detail.title}</div>
-                  <div className="text-gray-500">
-                    {
-                      props.fetchingData ? 
-                        <CurrencyDisplay
-                          amount={
-                            props.title === 'Per User/Month Plan' ? detail.price_per_user_per_month*props.currencyData.conversion : props.title === 'Yearly Plan' ? detail.price_yearly*props.currencyData.conversion : detail.price_enterprise*props.currencyData.conversion
-                          } 
-                          currencyCode={props.currencyData.name}
-                        />
-                      : 'Loading...'
-                    }
+                checkedFeatures.filter(detail => detail.tier !== 0).map(
+                  (detail, index) => {
+                    const featureTitle = detail.title
+                    const tier = detail.tier
+                    const { originalprice, price } = tierAndPriceCalculator(tier, detail.price_per_user_per_month)
+                    return (
+                      <div className="flex justify-between items-center gap-2" key={index}>
+                        <div className="leading-4 flex flex-col *:text-left">
+                          <div>{featureTitle}</div>
+                          <div className="text-gray-500 text-sm">Tier {tier}</div>
+                        </div>
+                        <div className="flex flex-col *:text-right leading-4">
+                          {
+                            fetchingData ? 
+                              <>
+                                {
+                                  (originalprice !== 0 && originalprice !== price)?
+                                  <div>
+                                    <CurrencyDisplay
+                                      className="text-[12px] line-through text-gray-500"
+                                      amountInInr={
+                                        originalprice * (title === 'Monthly Plan' ? 1 : 12)
+                                      } 
+                                    />
+                                  </div> :
+                                  null
+                                }
+                                <CurrencyDisplay
+                                  className=""
+                                  amountInInr={
+                                    price * (title === 'Monthly Plan' ? 1 : 12)
+                                  } 
+                                />
+                              </>
+                            : 'Loading...'
+                          }
+                        </div>
+                      </div>
+                    )
+                  }
+                )
+              }
+            </div>
+            {
+              discountedPrice !== 0 &&
+              <div className="border-t border-gray-500 mt-2 pt-3">
+                <div className="flex justify-between items-center gap-2 font-source-serif">
+                  <div className="leading-4 font-source-serif">Subtotal</div>
+                  <div className="text-gray-500"><CurrencyDisplay amountInInr={discountedPrice} /></div>
+                </div>
+                {
+                  title === 'Yearly Plan' ?
+                  <div className="flex justify-between items-center gap-2 font-source-serif">
+                    <div className="leading-4 font-source-serif">Annual Discount</div>
+                    <div className="text-gray-500">-10%</div>
+                  </div> :
+                  <div className="flex justify-between items-center gap-2 font-source-serif">
+                    <div className="leading-4 font-source-serif">GST applied on subtotal ({gst}%)</div>
+                    <div className="text-gray-500"><CurrencyDisplay amountInInr={payableAmount - totalDiscountedPrice} /></div>
                   </div>
+                }
+              </div>
+            }
+            {
+              totalDiscountedPrice !== 0 &&
+              title === 'Yearly Plan' &&
+              <div className="border-t border-gray-500 mt-2 pt-3">
+                <div className="flex justify-between items-center gap-2">
+                  <div className="leading-4 font-source-serif">Subtotal after applying annual discount</div>
+                  <div className="text-gray-500"><CurrencyDisplay amountInInr={totalDiscountedPrice} /></div>
+                </div>
+                <div className="flex justify-between items-center gap-2">
+                  <div className="leading-4 font-source-serif">GST applied on subtotal ({gst}%)</div>
+                  <div className="text-gray-500"><CurrencyDisplay amountInInr={payableAmount - totalDiscountedPrice} /></div>
+                </div>
+              </div>
+            }
+            <div className="border-y border-gray-500 mt-2 py-3">
+              <div className="flex justify-between items-center gap-2 text-lg">
+                <div className="leading-4 font-bold font-source-serif">Grand Total</div>
+                <div className="font-bold"><CurrencyDisplay amountInInr={payableAmount} /></div>
+              </div>
+              {
+                payableAmount !== 0 &&
+                payableAmount - originalPayableAmount !== 0 &&
+                <div className="flex justify-between items-center gap-2 mt-2">
+                  <div className="leading-4 font-source-serif text-lg">You saved</div>
+                  <div className="flex flex-col text-right">
+                    <div className="text-lg leading-4"><CurrencyDisplay amountInInr={payableAmount - originalPayableAmount} /></div>
+                    <div className="text-gray-500 text-sm">({Math.round((payableAmount-originalPayableAmount)*100/originalPayableAmount)}% off)</div>
                   </div>
-                ))
+                </div>
               }
             </div>
           </>
         }
       </div>
       <button
-        disabled={details.filter(detail => props.checkedFeatures[detail.featureID]).length === 0}
-        className="select-none font-source-serif text-lg w-3/5 bg-cyan-400 px-4 py-2 rounded-xl shadow-md text-black [&:not(:disabled):hover]:shadow-lg [&:not(:disabled):hover]:bg-cyan-300 [&:not(:disabled):active]:shadow-sm [&:not(:disabled):active]:bg-cyan-500 [&:not(:disabled):active]:scale-90 transition-all disabled:cursor-not-allowed disabled:grayscale"
+        disabled={checkedFeatures.filter(detail => detail.tier !== 0).length === 0}
+        className="select-none cursor-pointer font-source-serif text-lg w-3/5 bg-cyan-400 px-4 py-2 rounded-xl shadow-md text-black [&:not(:disabled):hover]:shadow-lg [&:not(:disabled):hover]:bg-cyan-300 [&:not(:disabled):active]:shadow-xs [&:not(:disabled):active]:bg-cyan-500 [&:not(:disabled):active]:scale-90 transition-all disabled:cursor-not-allowed disabled:grayscale"
         onClick={() => console.log('Hii')}
       >
         {
-          details.filter(detail => props.checkedFeatures[detail.featureID]).length === 0 ? 'Select Features' :
-          props.fetchingData ?
-          <>
-            Pay <CurrencyDisplay className="font-source-serif" amount={totalPrice} currencyCode={props.currencyData.name} />
-          </>
+          checkedFeatures.filter(detail => detail.tier !== 0).length === 0 ? 'Select Features' :
+          fetchingData ?
+            payableAmount !== 0 ?
+            <>
+              Pay <CurrencyDisplay className="font-source-serif" amountInInr={payableAmount} />
+            </> :
+            <>Click to continue</>
           : 'Loading...'
         }
       </button>

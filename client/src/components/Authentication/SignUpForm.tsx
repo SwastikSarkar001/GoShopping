@@ -211,7 +211,7 @@ export default function SignUpForm({
     <UserLocation data={ userCredentials } changeData={ changeData } />,
     <UserConsent setAllChecked={ setAllChecked } />
   ]
-  const [step, setStep] = useState(3)
+  const [step, setStep] = useState(1)
   const totalSteps = stepPages.length
   
   return (

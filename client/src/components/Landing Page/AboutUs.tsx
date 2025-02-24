@@ -102,7 +102,7 @@ export default forwardRef<HTMLDivElement, emptyProps>(function AboutUs(props, re
         <h1 className="block md:hidden section-header" style={{paddingTop: navbarHeight+48+'px'}}>About Us</h1>
         <div
           // ref={cardsSecRef}
-          className="md:w-1/2 flex md:block justify-around flex-col flex-grow md:flex-grow-0"
+          className="md:w-1/2 flex md:block justify-around flex-col grow md:grow-0"
         >
           {
             details.map((aboutdata, index) => {

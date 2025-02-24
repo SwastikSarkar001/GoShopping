@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 export default function CTA() {
   return (
-    <section className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-16 px-8 md:px-16">
+    <section className="bg-linear-to-r from-blue-500 to-indigo-600 text-white py-16 px-8 md:px-16">
       <div className="container mx-auto flex flex-col md:flex-row items-center gap-8 lg:gap-16 justify-center md:justify-between">
         {/* Text Section */}
         <div className="md:w-1/2 text-center md:text-left">

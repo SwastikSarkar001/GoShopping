@@ -10,7 +10,7 @@ export default function UpcomingFeatures() {
           We're working hard to bring this feature to life. Stay tuned for updates as we continue to enhance your eazzyBizz experience.
         </p>
         <div className="flex justify-center gap-4">
-          <Link to="/features" className="px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700">Explore Other Features</Link>
+          <Link to="/features" className="px-6 py-2 bg-blue-600 text-white rounded-sm shadow-sm hover:bg-blue-700">Explore Other Features</Link>
         </div>
       </div>
     </section>

@@ -10,7 +10,7 @@ type NavbarProps = {
 
 export default forwardRef<HTMLDivElement, NavbarProps>(function Navbar(props, ref) {
   return (
-    <motion.nav ref={ref} animate={props.animate} className='sticky top-0 w-full text-text bg-background border-b-2 border-[#808080] z-[100] px-8 py-4 flex items-center'>
+    <motion.nav ref={ref} animate={props.animate} className='sticky top-0 w-full text-text bg-background border-b-2 border-[#808080] z-100 px-8 py-4 flex items-center'>
       <Link to='/' className='font-source-serif text-4xl font-bold'>
         eazzyBizz
       </Link>

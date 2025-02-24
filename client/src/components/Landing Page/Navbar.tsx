@@ -49,7 +49,7 @@ export default function Navbar(props: navbar) {
 	})
 
 	return (
-		<motion.nav id='navbar' animate={controls} initial={initial} className={`flex transition-colors items-center justify-between fixed z-[100] top-0 left-0 right-0 ${(props.scrolled || optionsClicked) ? 'text-text' : 'text-white'} px-8 py-4 select-none border-[#808080]`}>
+		<motion.nav id='navbar' animate={controls} initial={initial} className={`flex transition-colors items-center justify-between fixed z-100 top-0 left-0 right-0 ${(props.scrolled || optionsClicked) ? 'text-text' : 'text-white'} px-8 py-4 select-none border-[#808080]`}>
 			<div className='hover:scale-110 active:scale-90 transition-transform'>
 				<Link to='/' className='font-source-serif text-4xl font-bold'>
 					eazzyBizz
@@ -151,7 +151,7 @@ function MediumScreenOpts(props: msopts) {
 	}
 
 	return (
-		<div className={`absolute flex flex-col gap-4 py-4 bg-background -z-20 border-y-2 border-[#808080] left-0 right-0 lg:!hidden transition-all duration-[250ms] ${props.clicked ? 'top-full opacity-100 pointer-events-auto' : 'top-0 opacity-0 pointer-events-none'}`}>
+		<div className={`absolute flex flex-col gap-4 py-4 bg-background -z-20 border-y-2 border-[#808080] left-0 right-0 lg:hidden! transition-all duration-[250ms] ${props.clicked ? 'top-full opacity-100 pointer-events-auto' : 'top-0 opacity-0 pointer-events-none'}`}>
 			{
 				sectionsInfo.map((section, index) => {
 					return (

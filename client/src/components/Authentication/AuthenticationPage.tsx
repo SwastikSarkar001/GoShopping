@@ -183,7 +183,7 @@ export default function AuthenticationPage() {
             setChecked={setChecked}
           />
         </div>
-        <div className={`hidden md:block text-white overlay-container absolute top-0 w-[40%] h-full bg-gradient-to-tr from-blue-500 to-indigo-600 overflow-hidden transition-all duration-[600ms] z-30 ${openSignUp ? 'left-0' : 'left-[60%]'}`}>
+        <div className={`hidden md:block text-white overlay-container absolute top-0 w-[40%] h-full bg-linear-to-tr from-blue-500 to-indigo-600 overflow-hidden transition-all duration-[600ms] z-30 ${openSignUp ? 'left-0' : 'left-[60%]'}`}>
           <div id='toggle-to-sign-in' className={`absolute gap-4 w-full flex items-center justify-center flex-col py-0 px-[40px] text-center h-full transform-all duration-[600ms] ${openSignUp ? 'left-0 opacity-100 pointer-events-auto' : 'left-full opacity-0 pointer-events-none'}`}>
             <Link to='/' className='font-source-serif text-4xl font-bold' tabIndex={openSignUp ? 0 : -1}>
               eazzyBizz

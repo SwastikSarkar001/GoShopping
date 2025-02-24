@@ -20,7 +20,7 @@ type CheckBoxProps = {
 export function CheckBox({id, label, checked, toggler}: CheckBoxProps) {
   return (
     <label className="cursor-pointer flex items-center justify-center gap-2 relative" htmlFor={id}>
-      <input type="checkbox" id={id} className='absolute scale-0 outline-none peer' checked={checked} onChange={toggler} />
+      <input type="checkbox" id={id} className='absolute scale-0 outline-hidden peer' checked={checked} onChange={toggler} />
       <svg viewBox="0 0 64 64" className='size-[1.3em] overflow-visible peer-focus-visible:outline peer-focus-visible:outline-black peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2'>
         <path
           className={`fill-none ${checked ? 'stroke-green-600' : 'stroke-black'} stroke-[6px] transition-all ease-[ease] duration-500`}
@@ -66,7 +66,7 @@ export function InputText({ label, id, name, Logo, data, changeData, required, p
         type="text"
         id={ id }
         name={ name }
-        className="bg-transparent min-w-0 flex-grow outline-none flex-shrink"
+        className="bg-transparent min-w-0 grow outline-hidden shrink"
         placeholder={ label }
         value={ data }
         onChange={ changeData }
@@ -118,7 +118,7 @@ export function InputPassword({id, name, label, data, autocomplete, changeData, 
           id={ id }
           name={ name }
           autoComplete={ autocomplete }
-          className={`bg-transparent flex-grow flex-shrink min-w-0 outline-none ${(!visible && data !== '') ? 'font-[Verdana] tracking-wide' : ''}`}
+          className={`bg-transparent grow shrink min-w-0 outline-hidden ${(!visible && data !== '') ? 'font-[Verdana] tracking-wide' : ''}`}
           placeholder={ label }
           value={ data }
           onChange={ changeData }
@@ -179,7 +179,7 @@ export function InputEmail({ label, id, name, data, changeData, isValid, isInval
         type="email"
         id={ id }
         name={ name }
-        className="bg-transparent min-w-0 flex-grow outline-none flex-shrink disabled:cursor-not-allowed"
+        className="bg-transparent min-w-0 grow outline-hidden shrink disabled:cursor-not-allowed"
         placeholder={ label }
         value={ data }
         onChange={ changeData }
@@ -220,9 +220,9 @@ export function InputPhone({ label, id, name, data, changeData, required, disabl
       <PhoneInput
         placeholder={ label }
         containerClass=""
-        buttonClass="!h-auto !border-none !bg-transparent"
-        inputClass="!outline-none !h-auto !w-full !border-none"
-        searchClass="!bg-transparent"
+        buttonClass="h-auto! border-none! bg-transparent!"
+        inputClass="outline-hidden! h-auto! w-full! border-none!"
+        searchClass="bg-transparent!"
         value={ data }
         onChange={
           (phoneNumber, cnData, event, val) => {
@@ -290,7 +290,7 @@ export function InputOTP({value, setValue, numInputs, disabled, otpStatus, setOt
       }
       shouldAutoFocus
       containerStyle={`flex gap-4 ${otpStatus === 'error' ? 'shake' : ''}`}
-      inputStyle={`flex-grow p-4 rounded-2xl disabled:cursor-not-allowed ${(otpStatus === 'success') ? '!bg-green-300/20' : (otpStatus === 'error') ? '!bg-red-300/20' : 'bg-gray-300/20'}`}
+      inputStyle={`grow p-4 rounded-2xl disabled:cursor-not-allowed ${(otpStatus === 'success') ? 'bg-green-300/20!' : (otpStatus === 'error') ? 'bg-red-300/20!' : 'bg-gray-300/20'}`}
       placeholder={"•".repeat(numInputs)}
     />
   )
