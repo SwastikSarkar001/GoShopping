@@ -117,7 +117,7 @@ export const welcomeToEazzyBizzTemplate: templateType = {
                     display: inline-block;
                     padding: 12px 25px;
                     background-color: #4CAF50;
-                    color: white;
+                    color: white !important;
                     text-decoration: none;
                     font-size: 16px;
                     border-radius: 5px;

@@ -5,18 +5,36 @@ import { createPortal } from "react-dom";
 type DialogContextProps = {
   open: boolean;
   openDialog: () => void;
-  closeDialog: () => void;
+  closeDialog: (skip?: boolean) => void;
 };
 
 const DialogContext = createContext<DialogContextProps | undefined>(undefined);
 
-export default function Dialog({ children }: React.PropsWithChildren) {
+type DialogProps = {
+  /** Function to execute on opening the dialog */
+  onOpen?: () => void
+  /** Function to execute on closing the dialog */
+  onClose?: () => boolean
+}
+
+export default function Dialog({ children, onOpen, onClose }: React.PropsWithChildren<DialogProps>) {
   const [open, setOpen] = useState(false)
   const openDialog = () => {
+    if (onOpen !== undefined) {
+      onOpen()
+    }
     setOpen(true)
   }
-  const closeDialog = () => {
-    setOpen(false)
+  const closeDialog = (skip?: boolean) => {
+    if (skip) {
+      setOpen(false)
+    }
+    else {
+      if (onClose !== undefined) {
+        if (onClose()) setOpen(false)
+      }
+      else setOpen(false)
+    }
   }
   const contextValue: DialogContextProps = {
     open,
@@ -65,28 +83,37 @@ export function DialogOverlay({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function DialogTrigger({ children, onClick, ...props }: React.PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>) {
+export function DialogTrigger({ children, onClick, asChild, ...props }: React.PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement> & {asChild?: boolean}>) {
   const context = useContext(DialogContext);
   if (!context) {
     throw new Error("DialogTrigger must be used within a Dialog");
   }
   const { openDialog } = context;
-  
-  return (
-    <button
-      {...props}
-      onClick={
-        e => {
-          if (onClick !== undefined) {
-            onClick(e)
-          }
-          openDialog()
-        }
-      }
-    >
-      {children}
-    </button>
-  );
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (onClick) {
+      onClick(e);
+    }
+    openDialog();
+  };
+  if (asChild) {
+    if (!React.isValidElement(children)) {
+      throw new Error("DialogTrigger: when asChild is true, children must be a valid React element.");
+    }
+    return React.cloneElement(children as React.ReactElement, {
+      ...props,
+      onClick: handleClick
+    })
+  }
+  else {
+    return (
+      <button
+        {...props}
+        onClick={handleClick}
+      >
+        {children}
+      </button>
+    );
+  }
 }
 
 export function DialogContent({ children, className, ...props }: React.PropsWithChildren<HTMLMotionProps<'div'>>) {
@@ -123,7 +150,7 @@ export function DialogContent({ children, className, ...props }: React.PropsWith
         >
           <button
             className="fixed z-10 top-4 right-4 text-2xl rounded-lg size-6 outline-none flex items-center justify-center text-center border-2 border-transparent hover:border-text transition-colors"
-            onClick={closeDialog}
+            onClick={() => closeDialog()}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +231,7 @@ export function DialogActionBtn({ children, className, onClick, ...props }: Reac
           if (onClick !== undefined) {
             onClick(e)
           }
-          closeDialog()
+          closeDialog(true)
         }
       }
     >

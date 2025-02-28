@@ -13,17 +13,21 @@ type CheckBoxProps = {
   /** The checked state of the checkbox. */
   checked: boolean,
   /** Function to toggle the checked state. */
-  toggler: () => void
+  toggler: (e: React.ChangeEvent<HTMLInputElement>) => void
+  /** The value of the checkbox. */
+  value?: React.InputHTMLAttributes<HTMLInputElement>['value']
+  /** Add classname in the input element */
+  inputClassName?: React.HTMLAttributes<HTMLInputElement>['className']
 }
 
 /** CheckBox component renders a checkbox with a label and custom SVG. */
-export function CheckBox({id, label, checked, toggler}: CheckBoxProps) {
+export function CheckBox({id, label, inputClassName, checked, toggler, value}: CheckBoxProps) {
   return (
     <label className="cursor-pointer flex items-center justify-center gap-2 relative" htmlFor={id}>
-      <input type="checkbox" id={id} className='absolute scale-0 outline-hidden peer' checked={checked} onChange={toggler} />
-      <svg viewBox="0 0 64 64" className='size-[1.3em] overflow-visible peer-focus-visible:outline peer-focus-visible:outline-black peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2'>
+      <input value={value} type="checkbox" id={id} className='absolute scale-0 outline-hidden peer' checked={checked} onChange={toggler} />
+      <svg viewBox="0 0 64 64" className={`size-[1.3em] overflow-visible ${checked ? 'stroke-green-600' : 'stroke-black'} peer-focus-visible:outline-black peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2${inputClassName ? ' '+inputClassName : ''}`}>
         <path
-          className={`fill-none ${checked ? 'stroke-green-600' : 'stroke-black'} stroke-[6px] transition-all ease-[ease] duration-500`}
+          className={`fill-none stroke-[6px] transition-all ease-[ease] duration-500`}
           strokeLinecap='round'
           strokeLinejoin='round'
           strokeDasharray={checked ? '70.5096664428711 9999999' : '241 9999999'}
@@ -56,17 +60,19 @@ type InputProps = {
   pattern?: string
   /** The suggestions to be displayed in the input. */
   suggestions?: string[]
+  /** Add classname in the input element */
+  inputClassName?: React.HTMLAttributes<HTMLInputElement>['className']
 }
 
 /** Renders a text input with an id, label and optional logo. */
-export function InputText({ label, id, name, Logo, data, changeData, required, pattern, suggestions }: InputProps) {
+export function InputText({ label, id, name, inputClassName, Logo, data, changeData, required, pattern, suggestions }: InputProps) {
   return (
     <label htmlFor={ id } className="bg-gray-300/20 invalid:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
       <input
         type="text"
         id={ id }
         name={ name }
-        className="bg-transparent min-w-0 grow outline-hidden shrink"
+        className={`bg-transparent min-w-0 grow outline-hidden shrink${inputClassName? ' ' + inputClassName : ''}`}
         placeholder={ label }
         value={ data }
         onChange={ changeData }
@@ -101,10 +107,12 @@ type PasswordProps = {
   changeData: (e: React.ChangeEvent<HTMLInputElement>) => void
   /** Whether to display password strength meter. */
   requirePasswordStrength?: boolean
+  /** Add classname in the input element */
+  inputClassName?: React.HTMLAttributes<HTMLInputElement>['className']
 }
 
 /** Renders a password input with visibility toggle and optional password strength indicator. */
-export function InputPassword({id, name, label, data, autocomplete, changeData, requirePasswordStrength}: PasswordProps) {
+export function InputPassword({id, name, inputClassName, label, data, autocomplete, changeData, requirePasswordStrength}: PasswordProps) {
   if (requirePasswordStrength === undefined) requirePasswordStrength = false
   const [visible, setVisible] = useState(false)
   const visibilityToggler = () => setVisible(prev => !prev)
@@ -118,7 +126,7 @@ export function InputPassword({id, name, label, data, autocomplete, changeData, 
           id={ id }
           name={ name }
           autoComplete={ autocomplete }
-          className={`bg-transparent grow shrink min-w-0 outline-hidden ${(!visible && data !== '') ? 'font-[Verdana] tracking-wide' : ''}`}
+          className={`bg-transparent grow shrink min-w-0 outline-hidden ${(!visible && data !== '') ? 'font-[Verdana] tracking-wide' : ''}${inputClassName? ' ' + inputClassName : ''}`}
           placeholder={ label }
           value={ data }
           onChange={ changeData }
@@ -165,10 +173,12 @@ type EmailProps = {
   isValid?: boolean
   /** Whether the given data is invalid or not */
   isInvalid?: boolean
+  /** Add classname in the input element */
+  inputClassName?: React.HTMLAttributes<HTMLInputElement>['className']
 }
 
 /** Renders a text input with an id, label and optional logo. */
-export function InputEmail({ label, id, name, data, changeData, isValid, isInvalid, disabled }: EmailProps) {
+export function InputEmail({ label, id, name, data, changeData, isValid, isInvalid, disabled, inputClassName }: EmailProps) {
   if (isValid && isInvalid) throw new Error('Both isValid and isInvalid props cannot be true at the same time.')
   return (
     <label
@@ -179,7 +189,7 @@ export function InputEmail({ label, id, name, data, changeData, isValid, isInval
         type="email"
         id={ id }
         name={ name }
-        className="bg-transparent min-w-0 grow outline-hidden shrink disabled:cursor-not-allowed"
+        className={`bg-transparent min-w-0 grow outline-hidden shrink disabled:cursor-not-allowed${inputClassName? ' ' + inputClassName : ''}`}
         placeholder={ label }
         value={ data }
         onChange={ changeData }
@@ -298,6 +308,12 @@ export function InputOTP({value, setValue, numInputs, disabled, otpStatus, setOt
 
 /** Properties for Button function */
 type ButtonProps = {
+  /** The id of the button */
+  id?: string
+  /** The type of the button */
+  type?: 'button' | 'submit' | 'reset'
+  /** The classname of the button */
+  className?: HTMLButtonElement['className']
   /** Function to be called on button click. */
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
   /** Asynchronous function to be called on button click. */
@@ -310,7 +326,7 @@ type ButtonProps = {
   text: string
 }
 
-export function Button({ onClick, onClickPromised, disabled, Icon, text }: ButtonProps) {
+export function Button({ id, type, className, onClick, onClickPromised, disabled, Icon, text }: ButtonProps) {
   const [loading, setLoading] = useState(false)
   if (onClick !== undefined && onClickPromised !== undefined) throw new Error('Both onClick and onClickPromised props cannot be defined at the same time.')
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -332,7 +348,9 @@ export function Button({ onClick, onClickPromised, disabled, Icon, text }: Butto
   }
   return (
     <button
-      className='disabled:bg-gray-400 disabled:cursor-not-allowed bg-black hover:bg-blue-500 focus-within:bg-blue-500 cursor-pointer transition-colors text-white font-bold p-4 rounded-2xl flex items-center justify-center gap-3'
+      id={id}
+      type={type}
+      className={`disabled:bg-gray-400 shadow-lg active:shadow-xs disabled:cursor-not-allowed hover:bg-blue-500 focus-within:bg-blue-500 cursor-pointer transition-all font-bold p-4 rounded-2xl flex items-center justify-center gap-3 ${className ? className : ''}`}
       onClick={handleClick}
       disabled={disabled || loading}
     >

@@ -168,29 +168,34 @@ export default function Pricing() {
   }, [])
 
   const [allDetails, setAllDetails] = useReducer(
-    (state: FeatureDetail[], action: {type: string, key: FeatureDetail['featureID'], value?: number}) => {
+    (state: FeatureDetail[], action: { type: string; key?: FeatureDetail["featureID"]; value?: number; payload?: FeatureDetail[] }) => {
       switch (action.type) {
+        case 'init':
+          return action.payload || [];
         case 'deselect':
-          return state.map(detail => {
-            if (detail.featureID === action.key) {
-              return { ...detail, tier: 0 }
-            }
-            return detail
-          })
+          return state.map(detail => detail.featureID === action.key ? { ...detail, tier: 0 } : detail)
         case 'set':
-          return state.map(detail => {
-            if (detail.featureID === action.key) {
-              if (action.value !== undefined) return { ...detail, tier: action.value }
-              else throw new Error('Value not provided')
-            }
-            return detail
-          })
+          return state.map(detail => detail.featureID === action.key ? (action.value !== undefined ? { ...detail, tier: action.value } : detail) : detail)
         default:
           return state
       }
     },
-    details
+    [] // Initial state is empty; will be populated from server.
   )
+
+  // Fetch feature details on mount from server
+  // useEffect(() => {
+  //   axios.get('/api/get-features')
+  //     .then(response => {
+  //       // Adjust extraction if your API wraps the data in an array:
+  //       const serverFeatures = response.data.data[0] as Omit<FeatureDetail, "sectionComponent">[]
+  //       const merged = mergeFeatureDetails(serverFeatures)
+  //       setAllDetails({ type: 'init', payload: merged })
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching details:', error)
+  //     })
+  // }, [])
 
   return (
     <CurrencyExchangeContext.Provider value={{...currency, setCurrency: setCurrency}}>

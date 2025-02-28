@@ -35,6 +35,7 @@ export default function StepNavigator({blockPage, currentStep, setStep, totalSte
         <Button
           onClick={prevStep}
           text='Previous'
+          className='text-white bg-black'
           Icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
@@ -47,6 +48,7 @@ export default function StepNavigator({blockPage, currentStep, setStep, totalSte
         <Button
           onClick={nextStep}
           text='Next'
+          className='text-white bg-black'
           disabled={blockPage}
           Icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">
@@ -60,6 +62,7 @@ export default function StepNavigator({blockPage, currentStep, setStep, totalSte
         <Button
           onClickPromised={submitFunc}
           text='Sign In'
+          className='text-white bg-black'
           disabled={blockPage}
           Icon={
             <svg viewBox="0 0 512 512" className='w-[1em]'>
