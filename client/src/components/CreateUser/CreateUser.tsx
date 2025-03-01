@@ -1,9 +1,14 @@
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import Navbar from "../Features/Navbar";
 import { Button, CheckBox, InputEmail, InputPassword, InputText } from "../Authentication/InputElements";
 import { UserSVG } from "../Authentication/Icons";
 import Dialog, { DialogActionBtn, DialogBody, DialogCloseBtn, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "../Utilities/Dialog";
+import { useAppSelector } from "../../states/store";
+// import useAuth from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { BiUserCheck, BiUserX } from "react-icons/bi";
 
 type UserInfo = {
   slno: number;
@@ -32,12 +37,26 @@ type CustomerDataType = {
 }
 
 export default function CreateUser() {
+  /** Check if user data is loaded */
+  const isAuthenticated = useAppSelector(state => state.user.isAuthenticated)
+
+  // const user = useAuth()
+  const navigate = useNavigate()
+  const loading = useAppSelector(state => state.user.loading)
+  useEffect(() => {
+    console.log('Hiii', 1)
+    if (!loading) {
+      if (!isAuthenticated) {
+        navigate('/auth', { replace: true })
+      }
+    }
+  }, [isAuthenticated, loading])  // eslint-disable-line
+
   /** State for all users of customer */
   const [allUsers, setAllUsers] = useState<UserInfo[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [formData, setFormData] = useState({
-    customer_id: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -54,8 +73,6 @@ export default function CreateUser() {
 
   const [roles, setRoles] = useState<string[]>([]);
   const [modules, setModules] = useState<string[]>([]);
-
-  const customerid = 1
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,11 +95,10 @@ export default function CreateUser() {
   };
   
   const handleSubmit = async () => {
-    console.log("Submitted Data:", formData);
-
     await axios.post("http://localhost:8000/users",
       formData,
       {
+        withCredentials: true,
         headers: {
           "Content-Type": "application/json"
         }
@@ -91,7 +107,6 @@ export default function CreateUser() {
 
     // Reset form data after submission
     setFormData({
-      customer_id: "",
       firstName: "",
       lastName: "",
       email: "",
@@ -103,30 +118,44 @@ export default function CreateUser() {
     setIsSubmitted(true);
   };
 
-  const handleStatusChange = async (userid: number, status: number) => {
-    // console.log("userid", userid);
-    // console.log("status", status);
+  const handleStatusChange = async (userids: number[], status: number) => {
+    const promises = userids.map(userid =>
+      axios.get(`http://localhost:8000/change_user_status`, {
+        params: {
+          userid: userid,
+          status: status
+        }
+      })
+    );
+    await Promise.all(promises);
+  };
 
-    await axios.get(`http://localhost:8000/change_user_status`, {
-      params: {
-        userid: userid,
-        status: status
-      }
-    });
-
+  const activateStatuses = async () => {
+    const userids = allUsers
+      .filter(user => childChecked[user.slno] && user.status === 0)
+      .map(user => user.slno);
+    await handleStatusChange(userids, 1);
     setIsSubmitted(true);
-    alert("Users Status Changed!!");
-  }
+  };
 
-  const getCreatedUsers = async (userid: number) => {
+  const deactivateStatuses = async () => {
+    const userids = allUsers
+      .filter(user => childChecked[user.slno] && user.status === 1)
+      .map(user => user.slno);
+    await handleStatusChange(userids, 0);
+    setIsSubmitted(true);
+  };
+
+  const getCreatedUsers = async () => {
+    if (!isAuthenticated) return;
     const response = await axios.get(`http://localhost:8000/get_created_users`, {
-      params: {
-        userid: userid
-      }
+      withCredentials: true
     });
     const data = response.data;
     setAllUsers(data);
   }
+
+  const refreshUsers = () => getCreatedUsers().then(() => setSearchableValue(''))
   
   const getRolesModules = async (arr: CustomerDataType[]) => {
     if (!Array.isArray(arr)) return;
@@ -152,79 +181,149 @@ export default function CreateUser() {
     setModules([...modSet]); // Convert Set back to array
   };
 
-  const getUserRoles = useCallback(async (customer_id: string) => {
+  const getUserRoles = async () => {
+    if (!isAuthenticated) return;
     const response = await axios.get(`http://localhost:8000/get__user_roles`, {
-      params: {
-        cusId: customer_id
-      }
+      withCredentials: true
     })
     const data = response.data as CustomerDataType[];
     getRolesModules(data);
-  }, [])
-
-  const updateCustomerId = (newId: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      customer_id: newId
-    }));
-  };
+  }
 
   /** Fetching all data (users created and available roles and modules of the customer) */
   useEffect(() => {
-    getCreatedUsers(customerid);
-    getUserRoles(customerid.toString());
-  }, [getUserRoles]);
+    console.log('Hiii', 2)
+    const fetchData = async () => {
+      if (isAuthenticated) {
+        await getCreatedUsers();
+        await getUserRoles();
+      }
+    };
+    fetchData();
+  }, [isAuthenticated]);  // eslint-disable-line
 
   useEffect(() => {
+    console.log('Hiii', 3)
     if (isSubmitted) {
-      getCreatedUsers(customerid);
+      getCreatedUsers();
       setIsSubmitted(false);
     }
-  }, [isSubmitted]);
-
-  useEffect(() => {
-    if (formData.customer_id === "" || formData.customer_id !== customerid.toString()) {
-      updateCustomerId(customerid.toString());
-    }
-  }, [formData])
+  }, [isSubmitted]);  // eslint-disable-line
   
+
   /** Pagination and searching logic begins */
 
   const [searchableValue, setSearchableValue] = useState("")
-  const [filteredUsers, setFilteredUsers] = useState<UserInfo[]>([])
+
+  /** All users that match the search value */
+  const filteredUsers = allUsers.filter(
+    user => {
+      const searchValue = searchableValue.toLowerCase()
+      return user.fname.toLowerCase().includes(searchValue) || user.lname.toLowerCase().includes(searchValue) || user.email.toLowerCase().includes(searchValue)      
+    }
+  )
+
   const [currentPage, setCurrentPage] = useState(1)
 
+  /** Function to change the search value */
   const changeSearchableValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchableValue(e.target.value)
   }
 
-  useEffect(() => {
-    const searchValue = searchableValue.toLowerCase()
-    setFilteredUsers(
-      allUsers.filter(user => {
-        return user.fname.toLowerCase().includes(searchValue) || user.lname.toLowerCase().includes(searchValue) || user.email.toLowerCase().includes(searchValue)
-      })
-    )
-    setCurrentPage(1)
-  }, [searchableValue, allUsers])
-
+  /** Maximum number of users that can be viewed on a single page */
   const maxViewableUsersPerPage = 10
+
+  /** Number of pages that will be needed to view all users */
   const pages = Math.ceil(filteredUsers.length / maxViewableUsersPerPage)
+
+  /** Function to view the previous page of users if available. */
   const viewPrevious = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1)
     }
   }
+
+  /** Function to view the next page of users if available. */
   const viewNext = () => {
     if (currentPage <= pages) {
       setCurrentPage(prev => prev + 1)
     }
   }
+
+  /** First user index that are viewable on the current page */
   const firstUserIndex = maxViewableUsersPerPage * (currentPage - 1) + 1  > filteredUsers.length ? filteredUsers.length : maxViewableUsersPerPage * (currentPage - 1) + 1
+  
+  /** Last user index that are viewable on the current page */
   const lastUserIndex = maxViewableUsersPerPage * currentPage > filteredUsers.length ? filteredUsers.length : maxViewableUsersPerPage * currentPage
+  
+  /** All users that are viewable on the current page */
   const viewableUsers = filteredUsers.slice((firstUserIndex - 1) >= 0 ? firstUserIndex - 1 : 0, lastUserIndex)
 
   /** Pagination and searching logic ends */
+
+  const [parentChecked, setParentChecked] = useState(false);
+  const [indeterminate, setIndeterminate] = useState(false);
+  
+  const parentCheckboxRef = useRef<HTMLInputElement>(null);
+  if (parentCheckboxRef.current) {
+    parentCheckboxRef.current.indeterminate = indeterminate;
+  }
+
+  const [childChecked, dispatchChildChecked] = useReducer(
+    (state: {[key: number]: boolean}, action: {type: string, payload: {index?: number, checked?: boolean}}) => {
+      switch (action.type) {
+        case 'SET_ALL':
+          allUsers.map(user => {
+            state[user.slno] = action.payload.checked!;
+          });
+          return state
+        case 'TOGGLE':
+          return {
+            ...state,
+            [action.payload.index!]: !state[action.payload.index!]
+          };
+        case 'SET':
+          return {
+            ...state,
+            [action.payload.index!]: action.payload.checked!
+          };
+        case 'RESET':
+          allUsers.map(user => state[user.slno] = false);
+          return state;
+        default:
+          return state;
+      }
+  }, {});
+
+  useEffect(() => {
+    console.log('Hiii', 4)
+    dispatchChildChecked({type: 'RESET', payload: {}});
+    setParentChecked(false);
+    setIndeterminate(false);
+  }, [allUsers]);
+
+  useEffect(() => {
+    console.log('Hiii', 5)
+    const allChecked = Object.values(childChecked).every(checked => checked);
+    const noneChecked = Object.values(childChecked).every(checked => !checked);
+    setParentChecked(allChecked);
+    setIndeterminate(!allChecked && !noneChecked);
+  }, [childChecked]);
+
+  const handleParentCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setParentChecked(checked);
+    setIndeterminate(false);
+    dispatchChildChecked({type: 'SET_ALL', payload: {checked}});
+  }
+
+  const handleChildCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    dispatchChildChecked({type: 'SET', payload: {index, checked: e.target.checked}});
+  }
+
+  const toggleChildUserCheckbox = (index: number) => {
+    dispatchChildChecked({type: 'TOGGLE', payload: {index}});
+  }
 
   return (
     <div>
@@ -246,7 +345,6 @@ export default function CreateUser() {
               const confirmClose = confirm("Are you sure you want to close this dialog? Your changes will not be saved.")
               if (confirmClose) {
                 setFormData({
-                  customer_id: "",
                   firstName: "",
                   lastName: "",
                   email: "",
@@ -260,11 +358,10 @@ export default function CreateUser() {
             }
           }
         }>
-          <DialogTrigger className="mt-2 self-end" asChild>
+          <DialogTrigger className="w-max text-background transition-all bg-text dark:hover:bg-blue-400 dark:focus-within:bg-blue-400 mt-2 self-end" asChild>
             <Button
               id="add-user"
               text="Add User"
-              className="w-max text-background bg-text dark:hover:bg-blue-400 dark:focus-within:bg-blue-400"
               Icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} className="size-[1.2em] stroke-background">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
@@ -341,17 +438,17 @@ export default function CreateUser() {
                     <h2 className='text-2xl mb-1 text-center font-source-serif'>Modules</h2>
                     {
                       modules && modules.map((module, i) => {
-                      return (
-                        <CheckBox
-                          key={i}
-                          id={`role-${module}`}
-                          label={module}
-                          inputClassName={`dark:peer-focus-visible:outline-white ${formData.modules.includes(module) ? "stroke-green-600" : "!stroke-text"}`}
-                          value={module}
-                          checked={formData.modules.includes(module)}
-                          toggler={e => handleCheckboxChange(e, "modules")}
-                        />
-                      )
+                        return (
+                          <CheckBox
+                            key={i}
+                            id={`role-${module}`}
+                            label={module}
+                            inputClassName={`dark:peer-focus-visible:outline-white ${formData.modules.includes(module) ? "stroke-green-600" : "!stroke-text"}`}
+                            value={module}
+                            checked={formData.modules.includes(module)}
+                            toggler={e => handleCheckboxChange(e, "modules")}
+                          />
+                        )
                       })
                     }
                   </div>
@@ -375,7 +472,7 @@ export default function CreateUser() {
           </DialogContent>
         </Dialog>
         <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 mt-4">
-          <div className="flex justify-between p-4 items-center text-sm gap-2 flex-wrap">
+          <div className="flex justify-between p-4 pb-2 items-center text-sm gap-2 flex-wrap">
             <label htmlFor='search-users' className="border border-slate-300/90 flex grow items-center dark:border-slate-700 rounded-lg md:w-[30%] px-4 py-2 gap-4">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} className="size-[1.25em] stroke-slate-400 dark:stroke-slate-600">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
@@ -390,20 +487,90 @@ export default function CreateUser() {
                 onChange={changeSearchableValue}
               />
             </label>
-            <div className="flex items-center gap-1 md:gap-4 *:p-2 *:disabled:cursor-not-allowed *:disabled:text-gray-400 *:transition-colors *:rounded-lg *:not-disabled:hover:bg-slate-200 *:dark:not-disabled:hover:bg-slate-800">
-              <div>
+            <div className="flex items-center gap-1 md:gap-4">
+              <div className="user-manage-btn">
                 Users {firstUserIndex}-{lastUserIndex} of {filteredUsers.length}
               </div>
-              <button onClick={viewPrevious} disabled={currentPage === 1} className="cursor-pointer disabled:cursor-not-allowed">
+              <button onClick={viewPrevious} disabled={currentPage === 1} className="user-manage-btn group">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-[1.2em]">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                 </svg>
+                <div className="user-manage-btn-desc">Previous</div>
               </button>
-              <button onClick={viewNext} disabled={currentPage === pages} className="cursor-pointer disabled:cursor-not-allowed">
+              <button onClick={viewNext} disabled={currentPage === pages} className="user-manage-btn group">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-[1.2em]">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                 </svg>
+                <div className="user-manage-btn-desc">Next</div>
               </button>
+            </div>
+          </div>
+          <div className="flex px-4 pb-2 items-center text-sm gap-4 flex-wrap">
+            <button
+              onClick={
+                () => {
+                  toast.promise(refreshUsers, {
+                    loading: 'Refreshing users. Please wait...',
+                    success: () => {
+                      dispatchChildChecked({type: 'RESET', payload: {}});
+                      return 'Users refreshed successfully!'
+                    },
+                    error: 'Failed to refresh users. Please try again.'
+                  })
+                }
+              }
+              className="user-manage-btn group"
+              aria-details="Refresh users"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-[1.2em]">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              <div className="user-manage-btn-desc">Refresh users</div>
+            </button>
+            <button
+              onClick={
+                () => {
+                  if (confirm("Are you sure you want to activate all selected users?"))
+                  toast.promise(activateStatuses, {
+                    loading: 'Activating users. Please wait...',
+                    success: () => {
+                      dispatchChildChecked({type: 'RESET', payload: {}});
+                      return 'Users activated successfully!'
+                    },
+                    error: 'Failed to activate users. Please try again.'
+                  })
+                }
+              }
+              disabled={!Object.values(childChecked).some(checked => checked)}
+              className="user-manage-btn group disabled:hidden"
+            >
+              <div className="user-manage-btn-desc">Activate</div>
+              <BiUserCheck className="text-lg stroke-0.5" />
+            </button>
+            <button
+              onClick={
+                () => {
+                  if (confirm("Are you sure you want to deactivate all selected users?"))
+                  toast.promise(deactivateStatuses, {
+                    loading: 'Deactivating users. Please wait...',
+                    success: () => {
+                      dispatchChildChecked({type: 'RESET', payload: {}});
+                      return 'Users deactivated successfully!'
+                    },
+                    error: 'Failed to deactivate users. Please try again.'
+                  })
+                }
+              }
+              disabled={!Object.values(childChecked).some(checked => checked)}
+              className="user-manage-btn group disabled:hidden"
+            >
+              <BiUserX className="text-lg stroke-0.5" />
+              <div className="user-manage-btn-desc">Deactivate</div>
+            </button>
+            <div
+              className={`user-manage-btn bg-blue-500/30 ${Object.values(childChecked).filter(checked => checked).length === 0 ? 'hidden' : 'block'}`}
+            >
+              {Object.values(childChecked).filter(checked => checked).length} selected
             </div>
           </div>
           <div className="overflow-x-auto scrollbar">
@@ -412,12 +579,12 @@ export default function CreateUser() {
                 <tr className="first:rounded-tl-2xl">
                   <th scope="col" className="p-4 border-t-2 border-b border-slate-400/30 dark:border-slate-600 bg-slate-50 transition-colors dark:bg-slate-900">
                     <p className="block text-sm leading-none text-text font-bold">
-                      <input type="checkbox" name="" id="" />
+                      <input ref={parentCheckboxRef} type="checkbox" name="" className="cursor-pointer" id="parent-users-checkbox" checked={parentChecked} onChange={handleParentCheckboxChange} />
                     </p>
                   </th>
                   <th scope="col" className="p-4 border-t-2 border-b border-slate-400/30 dark:border-slate-600 bg-slate-50 transition-colors dark:bg-slate-900">
                     <p className="block text-sm leading-none text-text font-bold">
-                      Serial
+                      User ID
                     </p>
                   </th>
                   <th scope="col" className="p-4 border-t-2 border-b border-slate-400/30 dark:border-slate-600 bg-slate-50 transition-colors dark:bg-slate-900">
@@ -437,7 +604,7 @@ export default function CreateUser() {
                   </th>
                   <th scope="col" className="p-4 border-t-2 border-b border-slate-400/30 dark:border-slate-600 bg-slate-50 transition-colors dark:bg-slate-900">
                     <p className="block text-sm leading-none text-text font-bold">
-                      Change Status
+                      Current Status
                     </p>
                   </th>
                 </tr>
@@ -446,9 +613,9 @@ export default function CreateUser() {
                 {
                   viewableUsers.length > 0 ?
                   viewableUsers.map((user, index) => (
-                    <tr key={index} className="hover:bg-slate-50 dark:hover:bg-slate-900">
+                    <tr key={index} className="hover:bg-blue-500/30 dark:hover:bg-blue-500/30 cursor-pointer" onClick={() => toggleChildUserCheckbox(user.slno)}>
                       <td className={`p-4 ${index !== viewableUsers.length - 1 ? 'border-b border-slate-200 dark:border-slate-700' : ''}`}>
-                        <input type="checkbox" name="" id="" />
+                        <input type="checkbox" name="" id={"child-users-checkbox-"+user.slno} className="cursor-pointer" checked={childChecked[user.slno] || false} onChange={e => handleChildCheckboxChange(e, user.slno)} />
                       </td>
                       <th scope="row" className={`p-4 ${index !== viewableUsers.length - 1 ? 'border-b border-slate-200 dark:border-slate-700' : ''}`}>
                         <p className="block text-sm text-text">
@@ -470,28 +637,10 @@ export default function CreateUser() {
                           {user.lname}
                         </p>
                       </td>
-                      <td className={`p-2 ${index !== viewableUsers.length - 1 ? 'border-b border-slate-200 dark:border-slate-700' : ''}`}>
-                        <button
-                          className={`rounded-lg p-2 pl-4 text-white flex items-center gap-2 w-full text-left ${user.status === 1 ? 'bg-red-500' : 'bg-green-500'}`}
-                          onClick={() => confirm(`${user.status === 1 ? 'Dea' : 'A'}ctivate status of user ${user.slno}?`) && handleStatusChange(user.slno, user.status === 0 ? 1 : 0)}
-                        >
-                          {
-                            user.status === 1 ?
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} className="size-[1em] stroke-white">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
-                              </svg>
-
-                              <div>Deactivate</div>
-                            </> :
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} className="size-[1em] stroke-white">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                              </svg>
-                              <div>Activate</div>
-                            </>
-                          }
-                        </button>
+                      <td className={`p-4 ${index !== viewableUsers.length - 1 ? 'border-b border-slate-200 dark:border-slate-700' : ''}`}>
+                        <p className={`block font-bold text-sm ${user.status === 1 ? 'text-green-500' : 'text-red-500'}`}>
+                          {user.status === 1 ? 'Activated' : 'Deactivated'}
+                        </p>
                       </td>
                     </tr>
                   )) :

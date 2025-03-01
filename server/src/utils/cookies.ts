@@ -3,14 +3,14 @@ import { CookieOptions } from "express";
 
 export const accessTokenOptions: CookieOptions = {
   secure: NODE_ENV.toLowerCase() === 'production',
-  sameSite: 'strict',
+  sameSite: NODE_ENV.toLowerCase() === 'production' ? 'strict' : 'lax',
   expires: new Date(Date.now() + 1000 * 60 * 60 * 1) // 1 hour
 }
 
 export const refreshTokenOptions: CookieOptions = {
   httpOnly: true,
   secure: NODE_ENV.toLowerCase() === 'production',
-  sameSite: 'strict',
+  sameSite: NODE_ENV.toLowerCase() === 'production' ? 'strict' : 'lax',
   expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days,
   // path: `api/${API_VERSION}/auth`
 }

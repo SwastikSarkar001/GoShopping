@@ -180,7 +180,7 @@ export default function Pricing() {
           return state
       }
     },
-    [] // Initial state is empty; will be populated from server.
+    details // Initial state is empty; will be populated from server.
   )
 
   // Fetch feature details on mount from server

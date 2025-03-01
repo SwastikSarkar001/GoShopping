@@ -143,9 +143,10 @@ export function DialogContent({ children, className, ...props }: React.PropsWith
           exit='transit'
           transition={{ duration: 0.15 }}
           className={
-            "fixed z-1000 overflow-y-auto p-4 scrollbar top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3/5 md:aspect-[6/7] not-md:w-full text-text bg-background border-2 border-gray-400/20 rounded-xl flex flex-col items-stretch" +
+            "fixed z-1000 overflow-y-auto p-4 pt-0 scrollbar top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3/5 md:aspect-[6/7] not-md:w-full text-text bg-background border-2 border-gray-400/20 rounded-xl flex flex-col items-stretch" +
             (className ? " " + className : "")
           }
+          aria-modal="true"
           {...props}
         >
           <button
@@ -178,7 +179,7 @@ export function DialogHeader({ children, className, ...props }: React.PropsWithC
   return (
     <div
       {...props}
-      className={"p-1 text-xl font-bold sticky top-0 bg-background" + (className ? ' '+className : '')}
+      className={"p-1 pt-5 text-xl font-bold sticky top-0 bg-background" + (className ? ' '+className : '')}
       // style={{
       //   // Option 1: Using sticky so header stays in view when body scrolls.
       //   position: "sticky",

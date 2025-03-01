@@ -38,7 +38,7 @@ export function PasswordSVG({ visible, toggler }: PasswordSVGProps) {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="size-[1.3em] shrink-0 fill-none cursor-pointer focus:outline-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-black rounded-sm"
+      className="size-[1.3em] shrink-0 fill-none cursor-pointer focus:outline-hidden focus-visible:outline-2 focus-visible:outline-black rounded-sm"
       tabIndex={0}
       onClick={toggler}
       onKeyDown={(e) => e.key === ' ' && toggler()}

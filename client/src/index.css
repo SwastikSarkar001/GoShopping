@@ -290,6 +290,14 @@
   animation: shake 0.5s;
 }
 
+@utility user-manage-btn {
+  @apply cursor-pointer p-2 disabled:cursor-not-allowed disabled:text-gray-400 transition-colors rounded-lg not-disabled:hover:bg-slate-200 dark:not-disabled:hover:bg-slate-800 relative;
+}
+
+@utility user-manage-btn-desc {
+  @apply text-nowrap pointer-events-none opacity-0 scale-0 group-hover:scale-100 group-hover:opacity-100 transition-all after:transition-colors rounded-lg absolute -translate-x-1/2 bottom-0 group-hover:-bottom-10 left-1/2 text-text bg-background border border-text px-2 py-1 after:absolute after:size-2.5 after:content-[''] after:bg-background after:-top-1.5 after:left-1/2 after:-translate-x-1/2 after:rotate-45 after:border-t after:border-l after:border-text;
+}
+
 @layer components {
   #background-about {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http:\/\/www.w3.org/2000/svg' version='1.1' xmlns:xlink='http:\/\/www.w3.org/1999/xlink' xmlns:svgjs='http:\/\/svgjs.dev/svgjs' preserveAspectRatio='none' viewBox='0 0 1440 560'%3e%3cg mask='url(%26quot%3b%23SvgjsMask1006%26quot%3b)' fill='none'%3e%3cpath d='M252.37 641.65C423.81 634.46 536.71 359.74 873.34 349.27 1209.96 338.8 1328.83 123.31 1494.3 119.67' stroke='rgba(0%2c0%2c0%2c0.2)' stroke-width='2'%3e%3c/path%3e%3cpath d='M259.64 582.01C374.21 579.04 471.61 414.63 686.37 414.47 901.12 414.31 899.73 484.47 1113.09 484.47 1326.46 484.47 1431.71 414.7 1539.82 414.47' stroke='rgba(0%2c0%2c0%2c0.2)' stroke-width='2'%3e%3c/path%3e%3cpath d='M882.71 659.71C1008.41 571.24 925.03 122.42 1157.24 109.53 1389.45 96.64 1565.91 226.47 1706.29 227.13' stroke='rgba(0%2c0%2c0%2c0.2)' stroke-width='2'%3e%3c/path%3e%3cpath d='M475.77 585.39C602.41 569.11 671.97 281.89 884.81 279.55 1097.65 277.21 1089.33 349.55 1293.85 349.55 1498.37 349.55 1599.14 279.8 1702.89 279.55' stroke='rgba(0%2c0%2c0%2c0.2)' stroke-width='2'%3e%3c/path%3e%3cpath d='M679.32 604.64C819.52 587.98 875.09 291.41 1137.24 274.12 1399.39 256.83 1471.76 92.76 1595.16 89.32' stroke='rgba(0%2c0%2c0%2c0.2)' stroke-width='2'%3e%3c/path%3e%3c/g%3e%3cdefs%3e%3cmask id='SvgjsMask1006'%3e%3crect width='1440' height='560' fill='white'%3e%3c/rect%3e%3c/mask%3e%3c/defs%3e%3c/svg%3e");

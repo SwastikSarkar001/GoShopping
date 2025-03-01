@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
 import Navbar from '../Features/Navbar'
 import { useAppSelector } from '../../states/store'
@@ -16,8 +16,11 @@ export default function Dashboard() {
     }
   }, [user])  // eslint-disable-line
   return (
-    <main>
+    <main className='text-text'>
       <Navbar />
+      <h1 className='text-3xl'>Dashboard</h1>
+      <p>Welcome {user?.firstName}!</p>
+      <Link to='/create-user' className='text-blue-500'>Click here to manage user</Link>
     </main>
   )
 }
