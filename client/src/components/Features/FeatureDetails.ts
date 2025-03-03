@@ -1,4 +1,5 @@
 import ChatApp from "./Feature Sections/eazzyChat/ChatApp"
+import CRMApp from "./Feature Sections/eazzyCRM/CRMApp";
 import UpcomingFeatures from "./Feature Sections/UpcomingFeatures"
 
 /**
@@ -63,7 +64,7 @@ const details: FeatureDetail[] = [{
     featureID: "eazzy-crm",
     title: "eazzyCRM",
     description: "Track and manage customer interactions and data throughout the customer lifecycle.",
-    sectionComponent: UpcomingFeatures,
+    sectionComponent: CRMApp,
     price_per_user_per_month: 299,
     tier: 0
   }, {
