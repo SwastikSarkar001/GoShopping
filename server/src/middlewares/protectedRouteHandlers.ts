@@ -23,7 +23,7 @@ export const accessProtectedRoute = (req: Request, res: Response, next: NextFunc
     if (accessToken) {
       try {
         const data = verifyToken(accessToken, AccessTokenSignOptions) as AccessTokenPayload
-        req.body.verifiedData = data
+        req.body.__verifiedData = data
         next()
       }
       catch (error) {
@@ -58,7 +58,7 @@ export const refreshProtectedRoute = (req: Request, res: Response, next: NextFun
     if (refreshToken) {
       try {
         const data = verifyToken(refreshToken, RefreshTokenSignOptions) as RefreshTokenPayload
-        req.body.verifiedData = data
+        req.body.__verifiedData = data
         next()
       }
       catch (error) {

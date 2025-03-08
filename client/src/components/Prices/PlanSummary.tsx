@@ -4,6 +4,9 @@ import { tierAndPriceCalculator } from "./utilities"
 import { useAppSelector } from "../../states/store"
 import { useLocation, useNavigate } from "react-router-dom"
 import { TierData } from "../../types"
+import { toast } from "sonner"
+import axios from "axios"
+import performProtectedRequest from "../../utilities/performProtectedRequest"
 
 type PlanSummaryProps = {
   features: TierFeatureDetail[],
@@ -120,6 +123,25 @@ function SummaryWrapper({ title, checkedFeatures, isLoadingFeatures, tiers, isLo
   const navigation = useNavigate()
   const location = useLocation()
 
+  const paymentHandler = async () => {
+    await performProtectedRequest(
+      () =>
+        axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/api/v1/plans/purchase`,
+        {
+          subscription: title === 'Monthly Plan' ? 0 : 1,
+          data: checkedFeatures
+                  .filter(feature => feature.tier !== 0)
+                  .map(feature => ({feature: feature.featureID, tier: feature.tier})),
+        },
+        {
+          withCredentials: true,
+          validateStatus: status => status === 200 || status === 401
+        }
+      )
+    )
+  }
+
   const buySubscription = () => {
     if (!isUserAuthenticated) {
       navigation('/auth', {
@@ -128,9 +150,17 @@ function SummaryWrapper({ title, checkedFeatures, isLoadingFeatures, tiers, isLo
         }
       })
     }
-    // Payment gateway integration
+    // Payment gateway integration goes here
     else {
-      console.log('Payment gateway not integrated yet')
+      if (confirm('Are you sure you want to proceed with the transaction?'))
+      toast.promise(paymentHandler, {
+        loading: 'Processing your transaction...',
+        success: () => {
+          navigation('/dashboard')
+          return 'Transaction successfully completed!'
+        },
+        error: 'Transaction failed for some reason! Please try again.'
+      })
     }
   }
 

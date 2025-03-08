@@ -5,6 +5,8 @@ import { useGetFeaturesQuery } from '../../states/apis/plansApiSlice';
 import ChatApp from './Feature Sections/eazzyChat/ChatApp';
 import CRMApp from './Feature Sections/eazzyCRM/CRMApp';
 import UpcomingFeatures from './Feature Sections/UpcomingFeatures';
+import Loading from '../Utilities/Loading';
+import ErrorFetching from '../Utilities/ErrorFetching';
 
 // Mapping of featureIDs to their respective section components
 const sectionComponents: Record<string, () => React.ReactNode> = {
@@ -50,12 +52,12 @@ export default function Feature() {
 
   // Handle loading state
   if (isLoadingFeatures) {
-    return <div>Loading...</div>;
+    return <Loading />
   }
 
   // Handle error state
   if (featuresError) {
-    return <div>Error loading features</div>;
+    return <ErrorFetching />
   }
 
   // Handle case where feature is not found after data is loaded

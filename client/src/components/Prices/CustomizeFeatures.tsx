@@ -265,7 +265,7 @@ function SelectedFeatures({ features, isLoadingFeatures, tiers, isLoadingTiers, 
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                   </svg>
                 </button>
-                <div className="absolute left-1/2 -translate-x-1/2 transition-all pointer-events-none opacity-0 origin-top scale-0 group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto border-2 border-gray-500 p-2 bg-background text-text text-sm">
+                <div className="absolute z-1 left-1/2 -translate-x-1/2 transition-all pointer-events-none opacity-0 origin-top scale-0 group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto border-2 border-gray-500 p-2 bg-background text-text text-sm">
                   <Dialog>
                     <DialogTrigger
                     className="w-full"

@@ -4,6 +4,7 @@ import redis from "databases/redis";
 import ApiError from "utils/ApiError";
 import ApiResponse from "utils/ApiResponse";
 import asyncHandler from "utils/asyncHandler";
+import { AccessTokenPayload } from "utils/jwt";
 import logger from "utils/logger";
 
 /**
@@ -213,6 +214,69 @@ export const getTiers = asyncHandler(
           throw new ApiError(INTERNAL_SERVER_ERROR, 'Tiers data cannot be fetched from MySQL')
         }
       }
+    }
+    catch(err) {
+      next(err)
+    }
+  }
+)
+
+export const purchasePlan = asyncHandler(
+  async (req, res, next) => {
+    try {
+      type RequestData = {
+        subscription: 0 | 1,  // Monthly -> 0, Yearly -> 1
+        data: {feature: string, tier: number}[]
+      } & { __verifiedData: AccessTokenPayload }
+
+      const reqData = req.body
+      const { __verifiedData, ...rest }: RequestData = reqData
+      const { subscription, data } = rest
+      
+      
+      sqlQuery('CALL purchasePlan(?, ?, ?)', [subscription, __verifiedData.userid, JSON.stringify(data)])
+      .then(() => {
+        res
+          .status(OK)
+          .json(new ApiResponse(OK, [], 'Plan purchased successfully'))
+      })
+      .catch(err => {
+        logger.error('Plan cannot be purchased for user', __verifiedData.userid)
+        throw new ApiError(INTERNAL_SERVER_ERROR, 'Plan cannot be purchased')
+      })
+    }
+    catch(err) {
+      next(err)
+    }
+  }
+)
+
+export const getUserPlans = asyncHandler(
+  async (req, res, next) => {
+    try {
+      type RequestData = { __verifiedData: AccessTokenPayload }
+
+      const reqData = req.body
+      const { __verifiedData }: RequestData = reqData
+      
+      const sqlData = await sqlQuery('CALL getUserPlans(?)', [__verifiedData.userid])
+      console.log(sqlData)
+      throw new ApiError(INTERNAL_SERVER_ERROR, 'User plans cannot be fetched')
+      // if (sqlData instanceof Array) {
+      //   if (sqlData[0] instanceof Array) {
+      //     res
+      //       .status(OK)
+      //       .json(new ApiResponse(OK, [], 'User plans fetched successfully'))
+      //   }
+      //   else {
+      //     logger.error('User plans cannot be fetched')
+      //     throw new ApiError(INTERNAL_SERVER_ERROR, 'User plans cannot be fetched')
+      //   }
+      // }
+      // else {
+      //   logger.error('User plans cannot be fetched')
+      //   throw new ApiError(INTERNAL_SERVER_ERROR, 'User plans cannot be fetched')
+      // }
     }
     catch(err) {
       next(err)

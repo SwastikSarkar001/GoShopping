@@ -181,7 +181,7 @@ export const verifyAndGenerateAccessToken = asyncHandler (
   async (req, res, next) => {
     try {
       // If verified then generate access token and send it back
-      const data: RefreshTokenPayload = req.body.verifiedData
+      const data: RefreshTokenPayload = req.body.__verifiedData
 
       // Check if the session exists in Redis
       if (redis.status === 'ready') {
@@ -357,7 +357,7 @@ export const signOut = asyncHandler (
   async (req, res, next) => {
     try {
       // Get the session id from the request body and validate
-      const data = req.body.verifiedData
+      const data = req.body.__verifiedData
 
       // Check if the session exists in the database
       const results = await sqlQuery(`CALL signOut(?)`, [data.sessionid]) as ResultSetHeader
@@ -380,7 +380,7 @@ export const getUserData = asyncHandler (
   async (req, res, next) => {
     try {
       // Get the user data from the request body and validate
-      const data = req.body.verifiedData as AccessTokenPayload
+      const data = req.body.__verifiedData as AccessTokenPayload
 
       let userdata, sessiondata
 

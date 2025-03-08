@@ -32,7 +32,7 @@ const qna = [
   },
   {
     question: 'What kind of customer support do you offer?',
-    answer: 'Our dedicated support team is available to assist you via phone and email around the clock. We also offer a comprehensive help center with tutorials, guides, and best practices to ensure your success.'
+    answer: 'Our dedicated support team is available 24x7 to assist you via phone and email around the clock. We also offer a comprehensive help center with tutorials, guides, and best practices to ensure your success.'
   },
   {
     question: 'How do I get started with eazzyCRM?',

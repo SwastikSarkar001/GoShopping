@@ -85,7 +85,7 @@ function UserBtn({user}: {user: UserData}) {
             </div>
             <div className="pt-2">
               <button
-                className="text-sm text-red-600 text-left flex gap-2 items-center"
+                className="text-sm text-red-600 text-left flex gap-2 items-center cursor-pointer"
                 onClick={
                   () => {
                     const b = confirm('Are you sure you want to logout?')

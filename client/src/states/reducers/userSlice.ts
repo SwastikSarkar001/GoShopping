@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { UserCredentialsType, UserSignInType } from "../../components/Authentication/AuthenticationPage"
 import axios from "axios"
+import performProtectedRequest from "../../utilities/performProtectedRequest"
 
 type User = {
   data: {
@@ -262,58 +263,80 @@ export const signOutUser = createAsyncThunk(
 )
 
 async function initProfile() {
-  const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/auth/user`,
-    {
+  const data = await performProtectedRequest(() => 
+    axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/auth/user`, {
       withCredentials: true,
       validateStatus: (status) => status === 200 || status === 401
-    }
+    })
   )
 
-  /* Valid access token */
-  if (response.status === 200) {
-    const responseData = response.data.data[0]
-    return {
-      firstName: responseData.firstname,
-      middleName: responseData.middlename,
-      lastName: responseData.lastname,
-      email: responseData.email,
-      phone: responseData.phone,
-      city: responseData.city,
-      state: responseData.state,
-      country: responseData.country
-    } as UserData
-  }
-
-  /* Access Token expires or not provided */
-  else if (response.status === 401) {
-    const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/auth/refresh`,
-      {
-        withCredentials: true,
-        validateStatus: (status) => status === 200 || status === 401
-      }
-    )
-
-    /* Valid refresh token and access token regenerated */
-    if (res.status === 200) {
-      return await initProfile()
-    }
-
-    /* Refresh token expires or not provided */
-    else if (res.status === 401) {
-      throw new Error(`Session has expired. Please sign in to continue.`)
-    }
-
-    /* Unexpected error while refreshing token */
-    else {
-      throw new Error(`An unexpected error occurred while refreshing the token.`)
-    }
-  }
-
-  /* Unexpected error while fetching user data */
-  else {
-    throw new Error(`An unexpected error occurred while fetching user data.`)
-  }
+  // Transform the returned data as needed.
+  const user = data.data[0]
+  return {
+    firstName: user.firstname,
+    middleName: user.middlename,
+    lastName: user.lastname,
+    email: user.email,
+    phone: user.phone,
+    city: user.city,
+    state: user.state,
+    country: user.country
+  } as UserData
 }
+
+// async function initProfile() {
+//   const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/auth/user`,
+//     {
+//       withCredentials: true,
+//       validateStatus: (status) => status === 200 || status === 401
+//     }
+//   )
+
+//   /* Valid access token */
+//   if (response.status === 200) {
+//     const responseData = response.data.data[0]
+//     return {
+//       firstName: responseData.firstname,
+//       middleName: responseData.middlename,
+//       lastName: responseData.lastname,
+//       email: responseData.email,
+//       phone: responseData.phone,
+//       city: responseData.city,
+//       state: responseData.state,
+//       country: responseData.country
+//     } as UserData
+//   }
+
+//   /* Access Token expires or not provided */
+//   else if (response.status === 401) {
+//     const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/auth/refresh`,
+//       {
+//         withCredentials: true,
+//         validateStatus: (status) => status === 200 || status === 401
+//       }
+//     )
+
+//     /* Valid refresh token and access token regenerated */
+//     if (res.status === 200) {
+//       return await initProfile()
+//     }
+
+//     /* Refresh token expires or not provided */
+//     else if (res.status === 401) {
+//       throw new Error(`Session has expired. Please sign in to continue.`)
+//     }
+
+//     /* Unexpected error while refreshing token */
+//     else {
+//       throw new Error(`An unexpected error occurred while refreshing the token.`)
+//     }
+//   }
+
+//   /* Unexpected error while fetching user data */
+//   else {
+//     throw new Error(`An unexpected error occurred while fetching user data.`)
+//   }
+// }
 
 export const getInitUserProfile = createAsyncThunk(
   'userdata/getInitUserProfile',

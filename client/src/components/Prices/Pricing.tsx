@@ -8,6 +8,7 @@ import Footer from "../Utilities/Footer"
 import getSymbolFromCurrency from "currency-symbol-map"
 import { useGetFeaturesQuery, useGetTiersQuery } from "../../states/apis/plansApiSlice"
 import { FeatureDetail, TierData } from "../../types"
+import ErrorFetching from "../Utilities/ErrorFetching"
 
 export type TierFeatureDetail = FeatureDetail & {
   /**
@@ -231,11 +232,7 @@ export default function Pricing() {
   if (featuresError || tiersError) {
     console.error('Error fetching features:', featuresError)
     console.error('Error fetching tiers:', tiersError)
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <h1 className="text-3xl text-red-500">Error fetching data</h1>
-      </div>
-    )
+    return <ErrorFetching />
   }
   else
   return (

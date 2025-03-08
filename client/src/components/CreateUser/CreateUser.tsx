@@ -5,10 +5,10 @@ import { Button, CheckBox, InputEmail, InputPassword, InputText } from "../Authe
 import { UserSVG } from "../Authentication/Icons";
 import Dialog, { DialogActionBtn, DialogBody, DialogCloseBtn, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "../Utilities/Dialog";
 import { useAppSelector } from "../../states/store";
-// import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { BiUserCheck, BiUserX } from "react-icons/bi";
+import performProtectedRequest from "../../utilities/performProtectedRequest";
 
 type UserInfo = {
   slno: number;
@@ -44,7 +44,6 @@ export default function CreateUser() {
   const navigate = useNavigate()
   const loading = useAppSelector(state => state.user.loading)
   useEffect(() => {
-    console.log('Hiii', 1)
     if (!loading) {
       if (!isAuthenticated) {
         navigate('/auth', { replace: true })
@@ -95,15 +94,19 @@ export default function CreateUser() {
   };
   
   const handleSubmit = async () => {
-    await axios.post("http://localhost:8000/users",
-      formData,
-      {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json"
+    await performProtectedRequest(
+      () =>
+        axios.post("http://localhost:8000/users",
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json"
+          },
+          validateStatus: (status) => status === 200 || status === 401
         }
-      }
-    );
+      )
+    )
 
     // Reset form data after submission
     setFormData({
@@ -148,10 +151,13 @@ export default function CreateUser() {
 
   const getCreatedUsers = async () => {
     if (!isAuthenticated) return;
-    const response = await axios.get(`http://localhost:8000/get_created_users`, {
-      withCredentials: true
-    });
-    const data = response.data;
+    const response = await performProtectedRequest(
+      () => axios.get(`http://localhost:8000/get_created_users`, {
+        withCredentials: true,
+        validateStatus: (status) => status === 200 || status === 401
+      })
+    )
+    const data = response as UserInfo[];
     setAllUsers(data);
   }
 
@@ -183,16 +189,18 @@ export default function CreateUser() {
 
   const getUserRoles = async () => {
     if (!isAuthenticated) return;
-    const response = await axios.get(`http://localhost:8000/get__user_roles`, {
-      withCredentials: true
-    })
-    const data = response.data as CustomerDataType[];
+    const response = await performProtectedRequest(
+      () => axios.get(`http://localhost:8000/get__user_roles`, {
+        withCredentials: true,
+        validateStatus: (status) => status === 200 || status === 401
+      })
+    )
+    const data = response as CustomerDataType[];
     getRolesModules(data);
   }
 
   /** Fetching all data (users created and available roles and modules of the customer) */
   useEffect(() => {
-    console.log('Hiii', 2)
     const fetchData = async () => {
       if (isAuthenticated) {
         await getCreatedUsers();
@@ -203,7 +211,6 @@ export default function CreateUser() {
   }, [isAuthenticated]);  // eslint-disable-line
 
   useEffect(() => {
-    console.log('Hiii', 3)
     if (isSubmitted) {
       getCreatedUsers();
       setIsSubmitted(false);
@@ -296,14 +303,12 @@ export default function CreateUser() {
   }, {});
 
   useEffect(() => {
-    console.log('Hiii', 4)
     dispatchChildChecked({type: 'RESET', payload: {}});
     setParentChecked(false);
     setIndeterminate(false);
   }, [allUsers]);
 
   useEffect(() => {
-    console.log('Hiii', 5)
     const allChecked = Object.values(childChecked).every(checked => checked);
     const noneChecked = Object.values(childChecked).every(checked => !checked);
     setParentChecked(allChecked);
