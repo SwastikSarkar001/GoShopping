@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button, CheckBox, InputEmail } from './InputElements'
 import { InputPassword } from './InputElements'
 import { signInDispatchType, UserSignInType } from './AuthenticationPage'
@@ -31,6 +31,7 @@ export default function SignInForm({
   }
   const toggler = () => setChecked(prev => !prev);
   const navigate = useNavigate()
+  const location = useLocation()
 
   const dispatchUser = useAppDispatch()
   const submitFunc = async (e: React.FormEvent<HTMLButtonElement>) => {
@@ -41,7 +42,7 @@ export default function SignInForm({
       toast.promise(userSignIn, {
         loading: 'Signing in...',
         success: () => {
-          navigate('/features', { replace: true })
+          navigate(location.state?.from?.pathname || '/features', { replace: true })
           return 'Signed in successfully! Welcome back!'
         },
         error: (error) => `${ error.message }`,

@@ -195,7 +195,7 @@ export const verifyAndGenerateAccessToken = asyncHandler (
           }
           const accessToken = generateAccessToken(accessPayload)
           res
-            .cookie('access_token', accessToken, { httpOnly: true, secure: true, sameSite: 'strict' })
+            .cookie('access_token', accessToken, accessTokenOptions)
             .status(OK)
             .json(
               new ApiResponse(OK, [accessToken], 'Access token generated successfully')
@@ -215,7 +215,7 @@ export const verifyAndGenerateAccessToken = asyncHandler (
             }
             const accessToken = generateAccessToken(accessPayload)
             res
-              .cookie('access_token', accessToken, { httpOnly: true, secure: true, sameSite: 'strict' })
+              .cookie('access_token', accessToken, accessTokenOptions)
               .status(OK)
               .json(
                 new ApiResponse(OK, [accessToken], 'Access token generated successfully')

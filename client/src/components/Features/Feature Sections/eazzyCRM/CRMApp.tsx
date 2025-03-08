@@ -10,7 +10,7 @@ import { useAnimation } from "framer-motion";
 import { useAppSelector } from "../../../../states/store";
 // import { useNavigate } from 'react-router-dom'
 
-export default function ChatApp() {
+export default function CRMApp() {
   const [scrolled, setScrolled] = useState(false)
   const handleScroll = () => {
     const scrollThreshold = window.innerHeight * 0.15; // 15% of viewport height

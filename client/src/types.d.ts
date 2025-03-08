@@ -45,3 +45,72 @@ interface AuthContextType {
   signUp: (data: UserCredentialsType) => Promise<void>,
   signOut: () => void
 }
+
+/** Represents the tier details of a plan. */
+export type TierData = {
+  /** The tier number */
+  tier: number,
+  /** The name of the tier */
+  tierName: string,
+  /** A brief description of the tier */
+  tierDescription: string,
+  /** The maximum number of users that can use the tier */
+  maxUsers: number,
+  /** The discount percentage for the tier */
+  discount: number
+}
+
+export type TiersResponse = {
+  /** Status code of the response */
+  statusCode: number,
+  /** Data from the server */
+  data: [TierData[]],
+  /** Message from the server */
+  message: string,
+  /** Success status of the response */
+  success: boolean
+}
+
+/** Represents the details of a feature in the shopping website. */
+export type FeatureDetail = {
+  /**
+   * Unique identifier for the feature.
+   * @example "feature023"
+   */
+  featureID: string;
+
+  /**
+   * The name of the feature.
+   * @example "Premium Support"
+   */
+  title: string;
+
+  /**
+   * A brief description of what the feature offers.
+   * @example "Provides 24/7 premium customer support."
+   */
+  description: string;
+
+  /**
+   * A React component that renders the feature's section.
+   * @returns A JSX element representing the feature's section.
+   */
+  sectionComponent: () => JSX.Element;
+
+  /**
+   * Monthly price for the feature used by 1 user, in INR.
+   * @example 9.99
+   */
+  price_per_user_per_month: number;
+}
+
+export type FeaturesResponse = {
+  /** Status code of the response */
+  statusCode: number,
+  /** Data from the server */
+  data: [FeatureDetail[]],
+  /** Message from the server */
+  message: string,
+  /** Success status of the response */
+  success: boolean
+}

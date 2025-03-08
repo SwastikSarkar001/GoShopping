@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import userReducer from './reducers/userSlice'
 import themeReducer from './reducers/themeSlice'
 import { useDispatch, useSelector } from 'react-redux'
+import { plansApiSlice } from './apis/plansApiSlice'
 // import storage from 'redux-persist/lib/storage'
 // import { persistReducer } from 'redux-persist'
 
@@ -23,7 +24,11 @@ import { useDispatch, useSelector } from 'react-redux'
 export const store = configureStore({
   reducer: {
     user: userReducer,
-    theme: themeReducer
+    theme: themeReducer,
+    [plansApiSlice.reducerPath]: plansApiSlice.reducer
+  },
+  middleware: (getDefaultMiddleware) => {
+    return getDefaultMiddleware().concat(plansApiSlice.middleware)
   }
 })
 

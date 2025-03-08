@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react"
-import { FeatureDetail } from "../Features/FeatureDetails"
-import { CurrencyDisplay } from "./Pricing"
+import { CurrencyDisplay, TierFeatureDetail } from "./Pricing"
 import { tierAndPriceCalculator } from "./utilities"
+import { useAppSelector } from "../../states/store"
+import { useLocation, useNavigate } from "react-router-dom"
+import { TierData } from "../../types"
 
 type PlanSummaryProps = {
-  features: FeatureDetail[],
+  features: TierFeatureDetail[],
+  isLoadingFeatures: boolean,
+  tiers: TierData[],
+  isLoadingTiers: boolean,
   fetchingData: boolean
 }
 
-export default function PlanSummary({ features, fetchingData }: PlanSummaryProps) {
+export default function PlanSummary({ features, isLoadingFeatures, tiers, isLoadingTiers, fetchingData }: PlanSummaryProps) {
   return (
     <div className=" mx-32 mt-4 text-center mb-auto">
       <div className="m-8 text-text font-source-serif text-4xl text-center">
@@ -16,13 +21,27 @@ export default function PlanSummary({ features, fetchingData }: PlanSummaryProps
       </div>
       <div>
         <h2 className="mb-8 text-text text-3xl font-source-serif">Select the plan that suit your needs</h2>
-        <PricingDetails features={features} fetchingData={fetchingData} />
+        <PricingDetails
+          features={features}
+          isLoadingFeatures={isLoadingFeatures}
+          tiers={tiers}
+          isLoadingTiers={isLoadingTiers}
+          fetchingData={fetchingData}
+        />
       </div>
     </div>
   )
 }
 
-function PricingDetails({ features, fetchingData }: { features: FeatureDetail[], fetchingData: boolean }) {
+type PricingDetailsProps = {
+  features: TierFeatureDetail[],
+  isLoadingFeatures: boolean,
+  tiers: TierData[],
+  isLoadingTiers: boolean,
+  fetchingData: boolean
+}
+
+function PricingDetails({ features, isLoadingFeatures, tiers, isLoadingTiers, fetchingData }: PricingDetailsProps) {
   const [billingType, setBillingType] = useState<'Monthly Plan' | 'Yearly Plan'>('Yearly Plan')
   const openMonthlyPlan = () => setBillingType('Monthly Plan')
   const openYearlyPlan = () => setBillingType('Yearly Plan')
@@ -43,12 +62,14 @@ function PricingDetails({ features, fetchingData }: { features: FeatureDetail[],
         </button>
       </div>
       <div className="flex flex-col gap-4 mt-8 w-1/2">
-        {
-          billingType === 'Monthly Plan' ?
-          <SummaryWrapper title={billingType} checkedFeatures={features} fetchingData={fetchingData} />
-          :
-          <SummaryWrapper title={billingType} checkedFeatures={features} fetchingData={fetchingData} />
-        }
+        <SummaryWrapper
+          title={billingType}
+          checkedFeatures={features}
+          isLoadingFeatures={isLoadingFeatures}
+          tiers={tiers}
+          isLoadingTiers={isLoadingTiers}
+          fetchingData={fetchingData}
+        />
       </div>
     </div>
   )
@@ -57,11 +78,14 @@ function PricingDetails({ features, fetchingData }: { features: FeatureDetail[],
 
 type summaryProps = {
   title: 'Monthly Plan' | 'Yearly Plan',
-  checkedFeatures: FeatureDetail[],
+  checkedFeatures: TierFeatureDetail[],
+  isLoadingFeatures: boolean,
+  tiers: TierData[],
+  isLoadingTiers: boolean,
   fetchingData: boolean
 }
 
-function SummaryWrapper({ title, checkedFeatures, fetchingData }: summaryProps) {
+function SummaryWrapper({ title, checkedFeatures, isLoadingFeatures, tiers, isLoadingTiers, fetchingData }: summaryProps) {
   /** GST applied */
   const gst = 18
 
@@ -84,13 +108,31 @@ function SummaryWrapper({ title, checkedFeatures, fetchingData }: summaryProps) 
     let original_value = 0
     let discounted_value = 0
     checkedFeatures.filter(detail => detail.tier !== 0).map(detail => {
-      const { originalprice, price } = tierAndPriceCalculator(detail.tier, detail.price_per_user_per_month)
+      const { originalprice, price } = tierAndPriceCalculator(tiers, detail.tier, detail.price_per_user_per_month)
       original_value += originalprice * (title === 'Monthly Plan' ? 1 : 12)
       discounted_value += price * (title === 'Monthly Plan' ? 1 : 12)
     })
     setOriginalPrice(original_value)
     setDiscountedPrice(discounted_value)
-  }, [checkedFeatures, title])
+  }, [checkedFeatures, title, tiers])
+
+  const isUserAuthenticated = useAppSelector(state => state.user.isAuthenticated)
+  const navigation = useNavigate()
+  const location = useLocation()
+
+  const buySubscription = () => {
+    if (!isUserAuthenticated) {
+      navigation('/auth', {
+        state: {
+          from: location
+        }
+      })
+    }
+    // Payment gateway integration
+    else {
+      console.log('Payment gateway not integrated yet')
+    }
+  }
 
   return (
     <div className={`border-2 ${title === 'Monthly Plan' ? 'border-gray-400 bg-gray-400/[0.075]' : 'border-emerald-400 bg-emerald-400/[0.08]'} text-text transition-colors rounded-xl py-8 px-4 flex flex-col gap-8 items-center`}>
@@ -112,7 +154,7 @@ function SummaryWrapper({ title, checkedFeatures, fetchingData }: summaryProps) 
                   (detail, index) => {
                     const featureTitle = detail.title
                     const tier = detail.tier
-                    const { originalprice, price } = tierAndPriceCalculator(tier, detail.price_per_user_per_month)
+                    const { originalprice, price } = tierAndPriceCalculator(tiers, tier, detail.price_per_user_per_month)
                     return (
                       <div className="flex justify-between items-center gap-2" key={index}>
                         <div className="leading-4 flex flex-col *:text-left">
@@ -206,11 +248,12 @@ function SummaryWrapper({ title, checkedFeatures, fetchingData }: summaryProps) 
         }
       </div>
       <button
-        disabled={checkedFeatures.filter(detail => detail.tier !== 0).length === 0}
+        disabled={isUserAuthenticated && checkedFeatures.filter(detail => detail.tier !== 0).length === 0}
         className="select-none cursor-pointer font-source-serif text-lg w-3/5 bg-cyan-400 px-4 py-2 rounded-xl shadow-md text-black [&:not(:disabled):hover]:shadow-lg [&:not(:disabled):hover]:bg-cyan-300 [&:not(:disabled):active]:shadow-xs [&:not(:disabled):active]:bg-cyan-500 [&:not(:disabled):active]:scale-90 transition-all disabled:cursor-not-allowed disabled:grayscale"
-        onClick={() => console.log('Hii')}
+        onClick={buySubscription}
       >
         {
+          !isUserAuthenticated ? 'Sign in to continue' :
           checkedFeatures.filter(detail => detail.tier !== 0).length === 0 ? 'Select Features' :
           fetchingData ?
             payableAmount !== 0 ?

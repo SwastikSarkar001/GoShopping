@@ -1,4 +1,4 @@
-import { lazy, useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 
 const HomePage = lazy(() => import('./Landing Page/HomePage'))
 const Features = lazy(() => import('./Features/Features'))
@@ -13,6 +13,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Pricing from './Prices/Pricing'
 import { useAppDispatch, useAppSelector } from '../states/store'
 import { getInitUserProfile } from '../states/reducers/userSlice'
+import Loading from './Utilities/Loading'
 
 const router = createBrowserRouter([{
       path: '/',
@@ -69,7 +70,9 @@ export default function App() {
 
   return (
     <>
-      <RouterProvider router={router} />
+      <Suspense fallback={<Loading />}>
+        <RouterProvider router={router} />
+      </Suspense>
       <Toaster position='top-center' richColors closeButton duration={6000} />
     </>
   )

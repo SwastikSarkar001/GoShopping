@@ -1,12 +1,31 @@
 import Navbar from "../Features/Navbar"
 import axios from "axios"
 import React, { forwardRef, useEffect, useState, useReducer, createContext, useContext } from "react"
-import details, { FeatureDetail } from "../Features/FeatureDetails"
 import CustomizeFeatures from "./CustomizeFeatures"
 import PlanSummary from "./PlanSummary"
 import GoToTop from "../Utilities/GoToTop"
 import Footer from "../Utilities/Footer"
 import getSymbolFromCurrency from "currency-symbol-map"
+import { useGetFeaturesQuery, useGetTiersQuery } from "../../states/apis/plansApiSlice"
+import { FeatureDetail, TierData } from "../../types"
+
+export type TierFeatureDetail = FeatureDetail & {
+  /**
+   * The tier for the feature.
+   * The tiers are as follows:
+   * 1. Basic - upto 5 users
+   * 2. Standard - upto 10 users
+   * 3. Premium - upto 15 users
+   * 4. Advanced - upto 20 users
+   * 5. Enterprise - upto 25 users
+   * 6. Ultimate - upto 30 users
+   * 7. Supreme - upto 40 users
+   * 8. Elite - upto 50 users
+   * @example 100
+   * @default 0 (Not selected)
+   */
+  tier: number;
+}
 
 type CurrencyProps = {
   /** Country code of client */
@@ -167,8 +186,11 @@ export default function Pricing() {
     document.title = 'Plans and Pricing | eazzyBizz'
   }, [])
 
+  /** Fetching all features data */
+  const { data: featuresResponse, isLoading: isLoadingFeatures, error: featuresError } = useGetFeaturesQuery({})
+  const initDetails: TierFeatureDetail[] = []
   const [allDetails, setAllDetails] = useReducer(
-    (state: FeatureDetail[], action: { type: string; key?: FeatureDetail["featureID"]; value?: number; payload?: FeatureDetail[] }) => {
+    (state: TierFeatureDetail[], action: { type: string; key?: TierFeatureDetail["featureID"]; value?: number; payload?: TierFeatureDetail[] }) => {
       switch (action.type) {
         case 'init':
           return action.payload || [];
@@ -180,29 +202,60 @@ export default function Pricing() {
           return state
       }
     },
-    details // Initial state is empty; will be populated from server.
+    initDetails // Initial state is empty; will be populated from server.
   )
+  useEffect(() => {
+    if (featuresResponse) {
+      const featureData: TierFeatureDetail[] = featuresResponse.map(feature => {
+        return {
+          ...feature,
+          tier: 0
+        }
+      })
+  
+      setAllDetails({ type: 'init', payload: featureData })
+    }
+  }, [featuresResponse])
 
-  // Fetch feature details on mount from server
-  // useEffect(() => {
-  //   axios.get('/api/get-features')
-  //     .then(response => {
-  //       // Adjust extraction if your API wraps the data in an array:
-  //       const serverFeatures = response.data.data[0] as Omit<FeatureDetail, "sectionComponent">[]
-  //       const merged = mergeFeatureDetails(serverFeatures)
-  //       setAllDetails({ type: 'init', payload: merged })
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching details:', error)
-  //     })
-  // }, [])
+  
+  /** Fetching all tiers data */
+  const { data: tiersResponse, isLoading: isLoadingTiers, error: tiersError } = useGetTiersQuery({})
+  const [tiers, setTiers] = useState<TierData[]>([])  // Initial state is empty; will be populated from server.
 
+  useEffect(() => {
+    if (tiersResponse) {
+      setTiers(tiersResponse)
+    }
+  }, [tiersResponse])
+
+  if (featuresError || tiersError) {
+    console.error('Error fetching features:', featuresError)
+    console.error('Error fetching tiers:', tiersError)
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <h1 className="text-3xl text-red-500">Error fetching data</h1>
+      </div>
+    )
+  }
+  else
   return (
     <CurrencyExchangeContext.Provider value={{...currency, setCurrency: setCurrency}}>
       <main className="min-h-screen flex flex-col items-stretch gap-8">
         <Navbar />
-        <CustomizeFeatures features={allDetails} featuresDispatch={setAllDetails} />
-        <PlanSummary features={allDetails} fetchingData={isFetchingData} />
+        <CustomizeFeatures
+          features={allDetails}
+          isLoadingFeatures={isLoadingFeatures}
+          tiers={tiers}
+          isLoadingTiers={isLoadingTiers}
+          featuresDispatch={setAllDetails}
+        />
+        <PlanSummary
+          features={allDetails}
+          isLoadingFeatures={isLoadingFeatures}
+          tiers={tiers}
+          isLoadingTiers={isLoadingTiers}
+          fetchingData={isFetchingData}
+        />
         <GoToTop scrolled={scrolled} />
         <Footer />
       </main>

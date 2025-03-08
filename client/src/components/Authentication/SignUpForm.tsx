@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import StepNavigator from './Sign Up Components/StepNavigator'
 import UserRegistration from './Sign Up Components/UserRegistration'
@@ -105,6 +105,7 @@ export default function SignUpForm({
   }
 
   const navigate = useNavigate()
+  const location = useLocation()
   const dispatchUser = useAppDispatch()
   const submitFunction = async (e: React.FormEvent<HTMLButtonElement>) => {
     try {
@@ -114,7 +115,7 @@ export default function SignUpForm({
       toast.promise(createUser, {
         loading: 'Creating your account...',
         success: () => {
-          navigate('/features', { replace: true })
+          navigate(location.state?.from?.pathname || '/features', { replace: true })
           return 'Registration successful! You are now a part of eazzyBizz family.'
         },
         error: (error) => `Registration failed! ${ error.message }`,

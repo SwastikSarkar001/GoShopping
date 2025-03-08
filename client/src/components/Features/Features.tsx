@@ -1,11 +1,20 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { NavLink } from "react-router-dom"
 import Navbar from "./Navbar"
 import Footer from "../Utilities/Footer"
-import details from "./FeatureDetails"
 import GoToTop from "../Utilities/GoToTop"
+import { useGetFeaturesQuery } from "../../states/apis/plansApiSlice"
+import { FeatureDetail } from "../../types"
 
 export default function FeaturesList() {
+  const { data: featuresResponse, isLoading: isLoadingFeatures, error: featuresError } = useGetFeaturesQuery({})
+  const [featureDetails, setFeatureDetails] = useState<FeatureDetail[]>([])
+  useEffect(() => {
+    if (featuresResponse) {
+      setFeatureDetails(featuresResponse)
+    }
+  }, [featuresResponse])
+
   const [scrolled, setScrolled] = useState(false)
   const handleScroll = () => {
     const scrollThreshold = window.innerHeight * 0.15; // 15% of viewport height
@@ -21,30 +30,17 @@ export default function FeaturesList() {
     document.title = "List of all features | eazzyBizz"
   }, [])
 
-  const searchRef = useRef<HTMLInputElement>(null)
-  const [viewableDetails, setViewableDetails] = useState(details)
   const [searchValue, setSearchValue] = useState("")
   const searchHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value)
   }
-  useEffect(() => {
-    if (searchRef.current !== null) {
-      if (searchRef.current.value === "") {
-        setViewableDetails(details)
-      } else {
-        const filteredDetails = details.filter(
-          (detail) =>
-            detail.title
-              .toLowerCase()
-              .includes(searchRef.current!.value.toLowerCase()) ||
-            detail.featureID
-              .toLowerCase()
-              .includes(searchRef.current!.value.toLowerCase())
-        )
-        setViewableDetails(filteredDetails)
-      }
-    }
-  }, [searchValue])
+
+  const filteredDetails = featureDetails.filter(
+    (detail) =>
+      detail.title.toLowerCase().includes(searchValue.toLowerCase()) ||
+      detail.featureID.toLowerCase().includes(searchValue.toLowerCase())
+  )
+
   return (
     <main className="min-h-screen flex flex-col items-center gap-16">
       <Navbar />
@@ -54,7 +50,6 @@ export default function FeaturesList() {
       <div className="flex w-full items-center justify-center">
         <input
           type="text"
-          ref={searchRef}
           value={searchValue}
           onChange={searchHandler}
           placeholder="What feature are you looking for?"
@@ -62,7 +57,22 @@ export default function FeaturesList() {
         />
       </div>
       {
-        viewableDetails.length === 0 ? (
+        isLoadingFeatures ? (
+          <div className="text-center text-gray-500 mb-auto flex items-center gap-4">
+            <div className="text-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em] animate-spin">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+            </div>
+            <p className="text-lg">Loading features...</p>
+          </div>
+        ) : featuresError ? (
+          <div className="text-center text-gray-500 mb-auto flex flex-col items-center">
+            <p className="text-2xl mb-4">🚫</p>
+            <p className="text-lg">Error fetching features. Please try again later.</p>
+          </div>
+        ) :
+        filteredDetails.length === 0 ? (
             <div className="text-center text-gray-500 mb-auto flex flex-col items-center">
               <p className="text-2xl mb-4">🔍</p>
               <p className="text-lg">Oops! We couldn't find any features matching your search.</p>
@@ -71,7 +81,7 @@ export default function FeaturesList() {
         ) : (
           <div className="grid gap-8 items-stretch grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mx-8 sm:mx-[20%] md:mx-32 mb-auto">
             {
-              viewableDetails.map((detail, index) => (
+              filteredDetails.map((detail, index) => (
                 <NavLink
                   to={`/features/${detail.featureID}`}
                   className="feature-grid"

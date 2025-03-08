@@ -78,7 +78,11 @@ export const getFeatures = asyncHandler(
                   price_per_user_per_month: parseFloat(feature.price_inr_pupm) as number
                 }
               })
-              await redis.call('JSON.SET', 'features', '.', JSON.stringify(finalData))
+              await redis
+                .pipeline()
+                .call('JSON.SET', 'features', '.', JSON.stringify(finalData))
+                .expire('features', 3600)  // Cache set to 1 hour intentionally to prevent stale data
+                .exec()
               res
                 .status(OK)
                 .json(new ApiResponse(OK, [finalData], 'Features retrieved successfully'))
@@ -160,7 +164,11 @@ export const getTiers = asyncHandler(
                   discount: parseFloat(tier.discount)
                 }
               })
-              await redis.call('JSON.SET', 'tiers', '.', JSON.stringify(finalData))
+              await redis
+                .pipeline()
+                .call('JSON.SET', 'tiers', '.', JSON.stringify(finalData))
+                .expire('tiers', 3600)  // Cache set to 1 hour intentionally to prevent stale data
+                .exec()
               res
                 .status(OK)
                 .json(new ApiResponse(OK, [finalData], 'Tiers retrieved successfully'))

@@ -288,6 +288,7 @@ async function initProfile() {
   else if (response.status === 401) {
     const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/auth/refresh`,
       {
+        withCredentials: true,
         validateStatus: (status) => status === 200 || status === 401
       }
     )
