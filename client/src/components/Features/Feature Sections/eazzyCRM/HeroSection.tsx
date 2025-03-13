@@ -13,13 +13,22 @@ export default function HeroSection() {
           </p>
           <p className="mt-2 text-[#ddd]">Experience a transformative CRM solution that empowers your sales team and enhances customer engagement with cutting-edge features designed for modern businesses.</p>
         </div>
-        <Link
-          to='/auth'
-          className="px-6 py-3 rounded-lg w-max font-semibold flex transition-all items-center gap-2 border-2 border-white bg-white text-emerald-600 shadow-md shadow-black/20 hover:scale-105 hover:bg-emerald-600 hover:text-white hover:shadow-lg hover:shadow-black/30 active:scale-90 active:shadow-xs active:shadow-black/10"
-        >
-          <p>Try eazzyCRM Now</p>
-          <FaArrowRightLong />
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            to='/auth'
+            className="px-6 py-3 rounded-lg w-max font-semibold flex transition-all items-center gap-2 border-2 border-white bg-white text-emerald-600 shadow-md shadow-black/20 hover:scale-105 hover:bg-emerald-600 hover:text-white hover:shadow-lg hover:shadow-black/30 active:scale-90 active:shadow-xs active:shadow-black/10"
+          >
+            <p>Buy eazzyCRM Now</p>
+            <FaArrowRightLong />
+          </Link>
+          <Link
+            to='/auth'
+            className="px-6 py-3 rounded-lg w-max font-semibold flex transition-all items-center gap-2 border-2 border-white bg-emerald-600 text-white shadow-md shadow-black/20 hover:scale-105 hover:bg-white hover:text-emerald-600 hover:shadow-lg hover:shadow-black/30 active:scale-90 active:shadow-xs active:shadow-black/10"
+          >
+            <p>Start Free Trial</p>
+            <FaArrowRightLong />
+          </Link>
+        </div>
       </div>
       <div className="hidden md:block w-1/2">
         <CRMAppSVG />

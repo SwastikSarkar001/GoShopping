@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
-import Navbar from '../Features/Navbar'
 import { useAppSelector } from '../../states/store'
+import GoToTop from '../Utilities/GoToTop'
+import DashboardSidebar from './DashboardSidebar'
 
 export default function Dashboard() {
   const user = useAuth()
@@ -15,12 +16,26 @@ export default function Dashboard() {
       }
     }
   }, [user])  // eslint-disable-line
+
+  const [scrolled, setScrolled] = useState(false)
+  const handleScroll = () => {
+    const scrollThreshold = window.innerHeight * 0.15; // 15% of viewport height
+    if (window.scrollY > scrollThreshold) {
+      setScrolled(true);
+    } else {
+      setScrolled(false);
+    }
+  }
+  window.onscroll = handleScroll
+
+  useEffect(() => {
+    document.title = 'Plans and Pricing | eazzyBizz'
+  }, [])
+  
   return (
-    <main className='text-text'>
-      <Navbar />
-      <h1 className='text-3xl'>Dashboard</h1>
-      <p>Welcome {user?.firstName}!</p>
-      <Link to='/create-user' className='text-blue-500'>Click here to manage user</Link>
+    <main className="text-text min-h-screen flex flex-col items-stretch">
+      <DashboardSidebar />
+      <GoToTop scrolled={scrolled} />
     </main>
   )
 }

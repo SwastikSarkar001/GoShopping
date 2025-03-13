@@ -6,7 +6,6 @@ const Feature = lazy(() => import('./Features/Feature'))
 const InvalidPage = lazy(() => import('./Utilities/InvalidPage'))
 const AuthenticationPage = lazy(() => import('./Authentication/AuthenticationPage'))
 const Dashboard = lazy(() => import('./Dashboard/Dashboard'))
-const CreateUser = lazy(() => import('./CreateUser/CreateUser'))
 
 import { Toaster } from 'sonner'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
@@ -35,9 +34,6 @@ const router = createBrowserRouter([{
     }, {
       path: '/dashboard',
       element: <Dashboard />,
-    }, {
-      path: '/create-user',
-      element: <CreateUser />
     }
   ], {
     future: {

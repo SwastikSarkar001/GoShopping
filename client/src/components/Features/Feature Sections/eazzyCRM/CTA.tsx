@@ -18,7 +18,13 @@ export default function CTA() {
               to="/auth"
               className="bg-white border-2 border-white text-emerald-700 font-semibold px-6 py-3 rounded-md shadow-md hover:bg-emerald-600 hover:text-white hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4"
             >
-              Get Started Today
+              Get This Product
+            </Link>
+            <Link
+              to="/auth"
+              className="bg-emerald-600 border-2 border-white text-white font-semibold px-6 py-3 rounded-md shadow-md hover:bg-white hover:text-emerald-600 hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4"
+            >
+              Start Free Trial
             </Link>
           </div>
         </div>

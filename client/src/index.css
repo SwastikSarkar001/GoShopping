@@ -97,6 +97,14 @@
   /* scrollbar-gutter: stable; */
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+  
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+
 @utility checkbox-wrapper {
   & input[type="checkbox"] {
     @apply invisible hidden;
@@ -274,7 +282,7 @@
 }
 
 @utility feature-grid {
-  @apply aspect-square w-full bg-cyan-500 flex flex-col gap-4 items-center justify-center rounded-xl text-center py-8 px-4 hover:scale-110 transition-all;
+  @apply aspect-square w-full bg-linear-to-r from-blue-500 to-violet-500 flex flex-col gap-4 items-center justify-center rounded-xl text-center py-8 px-4 hover:scale-110 transition-all;
 }
 
 @utility bg-animated {

@@ -1,14 +1,13 @@
 import axios from "axios";
 import { useEffect, useReducer, useRef, useState } from "react";
-import Navbar from "../Features/Navbar";
-import { Button, CheckBox, InputEmail, InputPassword, InputText } from "../Authentication/InputElements";
-import { UserSVG } from "../Authentication/Icons";
-import Dialog, { DialogActionBtn, DialogBody, DialogCloseBtn, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "../Utilities/Dialog";
-import { useAppSelector } from "../../states/store";
+import { Button, CheckBox, InputEmail, InputPassword, InputText } from "../../Authentication/InputElements";
+import { UserSVG } from "../../Authentication/Icons";
+import Dialog, { DialogActionBtn, DialogBody, DialogCloseBtn, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "../../Utilities/Dialog";
+import { useAppSelector } from "../../../states/store";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { BiUserCheck, BiUserX } from "react-icons/bi";
-import performProtectedRequest from "../../utilities/performProtectedRequest";
+import performProtectedRequest from "../../../utilities/performProtectedRequest";
 
 type UserInfo = {
   slno: number;
@@ -36,7 +35,7 @@ type CustomerDataType = {
   roles: string[]
 }
 
-export default function CreateUser() {
+export default function Users() {
   /** Check if user data is loaded */
   const isAuthenticated = useAppSelector(state => state.user.isAuthenticated)
 
@@ -332,9 +331,8 @@ export default function CreateUser() {
 
   return (
     <div>
-      <Navbar />
-      <div className="text-text p-8 flex flex-col gap-2">
-        <h1 className="text-3xl font-source-serif flex items-center gap-4">
+      <div className="text-text px-2 py-4 sm:p-8 flex flex-col gap-2">
+        <h1 className="text-3xl font-source-serif flex items-center gap-4 font-semibold">
           Users
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-[1em]">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
@@ -643,7 +641,7 @@ export default function CreateUser() {
                         </p>
                       </td>
                       <td className={`p-4 ${index !== viewableUsers.length - 1 ? 'border-b border-slate-200 dark:border-slate-700' : ''}`}>
-                        <p className={`block font-bold text-sm ${user.status === 1 ? 'text-green-500' : 'text-red-500'}`}>
+                        <p className={`px-2.5 py-1 select-none leading-4 inline-flex text-xs font-semibold rounded-full ${user.status === 1 ? 'text-green-800 bg-green-200' : 'text-red-800 bg-red-200'}`}>
                           {user.status === 1 ? 'Activated' : 'Deactivated'}
                         </p>
                       </td>

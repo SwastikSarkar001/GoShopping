@@ -26,7 +26,7 @@ const details = [{
 export default function AppFeatures() {
   const theme = useAppSelector(state => state.theme.theme)
   return (
-    <section className="text-text py-32 px-16 flex flex-wrap items-stretch justify-center place-items-center text-center gap-16">
+    <section className="text-text py-24 px-16 flex flex-wrap items-stretch justify-center place-items-center text-center gap-16">
       {
         details.map((detail, index) => (
           <div key={index} className={`border-2 ${ theme === 'dark' ? 'hover:bg-white/10' : 'hover:bg-black/10' } rounded-2xl min-w-48 w-full max-w-xs p-8 duration-150 flex items-center justify-between flex-col gap-4`}>

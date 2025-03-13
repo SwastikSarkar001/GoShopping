@@ -8,6 +8,7 @@ import CTA from "./CTA"
 import Footer from "../../../Utilities/Footer"
 import { useAnimation } from "framer-motion";
 import { useAppSelector } from "../../../../states/store";
+import ShowTiers from "./ShowTiers"
 // import { useNavigate } from 'react-router-dom'
 
 export default function CRMApp() {
@@ -38,6 +39,7 @@ export default function CRMApp() {
       <Navbar ref={ref} animate={controls} />
       <HeroSection />
       <AppFeatures />
+      <ShowTiers />
       <FAQs />
       <CTA />
       <Footer />
