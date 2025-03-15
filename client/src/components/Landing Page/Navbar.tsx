@@ -5,7 +5,6 @@ import sectionsInfo from './sectiondata'
 import { large } from '../../../windowSizes'
 import ThemeToggler from '../Utilities/ThemeToggler'
 import { Link } from 'react-router-dom'
-import { RxOpenInNewWindow } from "react-icons/rx";
 import { useAppDispatch, useAppSelector } from '../../states/store'
 import { toggleTheme } from '../../states/reducers/themeSlice'
 
@@ -71,11 +70,9 @@ export default function Navbar(props: navbar) {
 				}
 				<Link
 					to='/plans'
-					target='_blank'
 					className="text-xl py-2 transition-transform cursor-pointer hover:scale-110 active:scale-90 duration-200 flex items-center gap-2"
 				>
 					<div>Plans and Pricing</div>
-					<div><RxOpenInNewWindow /></div>
 				</Link>
 			</div>
 			<ThemeToggler className='hidden md:block ml-auto lg:mr-[5%]' />
@@ -171,14 +168,12 @@ function MediumScreenOpts(props: msopts) {
 			}
 			<Link
 				to='/plans'
-				target='_blank'
 				className='pr-4 transition-all text-lg group/medopts flex items-center overflow-hidden cursor-pointer active:scale-90'
 			>
 				<div className='flex items-center overflow-hidden'>
 					<div className='-translate-x-full mx-0 transition-all group-hover/medopts:translate-x-0 group-hover/medopts:mx-4 opacity-0 group-hover/medopts:opacity-100'>→</div>
 					<div className='flex items-center gap-2'>
 						<div>Plans and Pricing</div>
-						<div><RxOpenInNewWindow /></div>
 					</div>
 				</div>
 			</Link>
