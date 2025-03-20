@@ -26,10 +26,9 @@ import crypto from "crypto"
  * **This function must be used inside the callback function of `asyncHandler()` function for smooth error handling,**
  * **or else the server may crash due to unhandled exceptions.**
  */
-export const isUserExists = async (field: 'email' | 'phone', value: string): Promise<boolean> => {
-
-  /* If Redis is ready then check from Redis database */
-  if (redis.status === 'ready') {
+export const isUserExists = async (field: 'email' | 'phone' | 'sitename', value: string): Promise<boolean> => {
+  /* If Redis is ready or sitename is not to be checked then check from Redis database */
+  if (redis.status === 'ready' && field !== 'sitename') {
     const data = await redis.call('FT.SEARCH', 'users-idx', `@${field}:${escapeSearchSymbols(value)}`) as any[]
 
     /* If user exists then return true */
@@ -188,6 +187,25 @@ export const verifyOtp = asyncHandler (
         else {
           throw new ApiError(UNAUTHORIZED, 'Incorrect or invalid OTP')
         }
+      }
+    }
+    catch (err) {
+      next(err)
+    }
+  }
+)
+
+export const verifySitename = asyncHandler (
+  async (req, res, next) => {
+    try {
+      const { value } = req.query
+      if (!value) throw new ApiError(BAD_REQUEST, 'Invalid request body')
+      const userExists = await isUserExists('sitename', value as string)
+      if (userExists) {
+        throw new ApiError(CONFLICT, 'Sitename already exists!')
+      }
+      else {
+        res.status(OK).json(new ApiResponse(OK, [], `Unique site name!`))
       }
     }
     catch (err) {

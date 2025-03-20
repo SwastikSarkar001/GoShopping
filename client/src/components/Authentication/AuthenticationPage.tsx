@@ -20,6 +20,7 @@ export type UserCredentialsType = {
   mname: string
   lname: string
   email: string
+  sitename: string
   password: string
   confirm: string
   phone: string
@@ -33,6 +34,7 @@ const signUpInitialState: UserCredentialsType = {
   mname: '',
   lname: '',
   email: '',
+  sitename: '',
   password: '',
   confirm: '',
   phone: '',
@@ -42,7 +44,7 @@ const signUpInitialState: UserCredentialsType = {
 }
 
 export type signUpDispatchType = {
-  type: 'fname' | 'mname' | 'lname' | 'email' | 'password' | 'confirm' | 'phone' | 'city' | 'state' | 'country' | 'reset'
+  type: 'fname' | 'mname' | 'lname' | 'email' | 'sitename' | 'password' | 'confirm' | 'phone' | 'city' | 'state' | 'country' | 'reset'
   value: string
 }
 
@@ -75,6 +77,8 @@ export default function AuthenticationPage() {
           return { ...state, mname: action.value }
         case 'lname':
           return { ...state, lname: action.value }
+        case 'sitename':
+          return { ...state, sitename: action.value }
         case 'password':
           return { ...state, password: action.value }
         case 'confirm':
@@ -98,10 +102,23 @@ export default function AuthenticationPage() {
     signUpInitialState
   )
 
+  // Sign Up Page Step state and dispatch function for updating the states
+  const [signUpPageStep, setSignUpPageStep] = useState(3)
+
   // OTP state and dispatch function for updating the states
-  const [savedData, setSavedData] = useState<(string | null)[]>([null, null])
-  const [disableAll, setDisableAll] = useState([false, false])
-  const [otpValue, setOtpValue] = useState(['', ''])
+  const [savedData, setSavedData] = useState<{'email': string | null, 'sitename': string | null, 'phone': string | null}>({
+    email: null,
+    sitename: null,
+    phone: null
+  })
+  const [disableAll, setDisableAll] = useState<{'email': boolean, 'phone': boolean}>({
+    email: false,
+    phone: false
+  })
+  const [otpValue, setOtpValue] = useState<{'email': string, 'phone': string}>({
+    email: '',
+    phone: ''
+  })
   const [allChecked, setAllChecked] = useState(false)
 
 
@@ -141,9 +158,10 @@ export default function AuthenticationPage() {
       if (!b) return
       else {
         signUpDispatch({ type: 'reset', value: '' })
-        setSavedData([null, null])
-        setDisableAll([false, false])
-        setOtpValue(['', ''])
+        setSignUpPageStep(1)
+        setSavedData({ email: null, sitename: null, phone: null })
+        setDisableAll({ email: false, phone: false })
+        setOtpValue({ email: '', phone: '' })
         setAllChecked(false)
       }
     }
@@ -151,6 +169,22 @@ export default function AuthenticationPage() {
     // Toggle the sign-up form visibility
     setOpenSignUp(prev => !prev)
   }
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (
+        !Object.entries(signInUserCredentials).every(([, value]) => value === '') ||
+        !Object.entries(signUpUserCredentials).every(([, value]) => value === '')
+      ) {
+        event.preventDefault();
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [signInUserCredentials, signUpUserCredentials])
 
   useEffect(() => {
     document.title = openSignUp ? 'eazzyBizz | Register Now!' : 'eazzybizz | Sign in to continue!'
@@ -161,6 +195,8 @@ export default function AuthenticationPage() {
       <div className="size-full md:w-[80vw] lg:w-[60vw] md:h-[80vh] shadow-2xl md:rounded-3xl overflow-hidden relative">
         <div id='sign-up-form' className={`bg-white form-container absolute size-full md:w-[60%] transition-all duration-[600ms] z-10 ${openSignUp ? 'left-0 md:left-[40%] opacity-100 pointer-events-auto' : '-left-full md:left-full opacity-0 pointer-events-none'}`}>
           <SignUpForm
+            step={signUpPageStep}
+            setStep={setSignUpPageStep}
             openSignIn={toggleSignUp}
             userCredentials={signUpUserCredentials}
             dispatch={signUpDispatch}
@@ -193,7 +229,7 @@ export default function AuthenticationPage() {
             </div>
             <button
               onClick={ toggleSignUp }
-              className="rounded-lg px-4 py-2 border-2 font-semibold"
+              className="rounded-lg px-4 py-2 border-2 font-semibold cursor-pointer"
               tabIndex={openSignUp ? 0 : -1}
             >
               Sign In
@@ -208,7 +244,7 @@ export default function AuthenticationPage() {
             </div>
             <button
               onClick={ toggleSignUp }
-              className="rounded-lg px-4 py-2 border-2 font-semibold"
+              className="rounded-lg px-4 py-2 border-2 font-semibold cursor-pointer"
               tabIndex={openSignUp ? -1 :0}
             >
               Sign Up

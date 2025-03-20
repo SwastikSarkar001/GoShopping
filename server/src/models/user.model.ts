@@ -40,6 +40,11 @@ const UserSchema = z.object({
       }, { message: 'Phone number is invalid. Only international phone numbers starting with the country code are valid.' }
     )
     .describe('The phone number of the user'),
+  sitename: z
+    .string()
+    .min(5, { message: 'Sitename must be at least 5 characters long' })
+    .max(15, { message: 'Sitename must be at most 15 characters long' })
+    .regex(/[a-z]+/, { message: 'Sitename must contain only lowercase alphabets' }),
   city: z.string().describe('The city of residence of the user'),
   state: z.string().describe('The state of residence of the user'),
   country: z.string().describe('The country of residence of the user'),

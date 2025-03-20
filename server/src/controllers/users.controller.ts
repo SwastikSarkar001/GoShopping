@@ -15,7 +15,7 @@ import { isUserExists } from './utils.controller'
 import { ResultSetHeader } from 'mysql2'
 import { sendEmail } from 'utils/Nodemailer'
 import { welcomeToEazzyBizzTemplate } from 'utils/Mails'
-
+import { MYSQL_SECRET_KEY } from 'constants/env'
 
 export const addUser = asyncHandler (
   async (req, res, next) => {
@@ -34,6 +34,7 @@ export const addUser = asyncHandler (
             lastname: true,
             email: true,
             phone: true,
+            sitename: true,
             city: true,
             state: true,
             country: true,
@@ -53,17 +54,17 @@ export const addUser = asyncHandler (
         }
 
         /* Prepare the values to insert into the database */
-        const values = [...Object.values(userdata), userAgent]
+        const values = [...Object.values(userdata), userAgent, MYSQL_SECRET_KEY]
 
         /* Insert user data into database and get the result */
-        const results = await sqlQuery(`CALL addUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
+        const results = await sqlQuery(`CALL addUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
         /* If user added successfully then return the user data */
         if (results instanceof Array) {
           const [result] = results[0] as returnType[]
           if (result === undefined) throw new ApiError(BAD_REQUEST, 'User not added')
           
           /* Prepare the user data */
-          const {password, ...restUser} = userdata
+          const {password, sitename, ...restUser} = userdata
           const userid = result['@uid']
 
           /* Prepare the session data */
@@ -163,20 +164,6 @@ export const addUser = asyncHandler (
   }
 )
 
-export const verifyUser = asyncHandler (
-  async (req, res, next) => {
-    try {
-      // Get the access token from the request header
-      // Verify the access token
-      // If verified then send a success response
-      // If not verified then send unauthorized response
-    }
-    catch (err) {
-      next(err)
-    }
-  }
-)
-
 export const verifyAndGenerateAccessToken = asyncHandler (
   async (req, res, next) => {
     try {
@@ -231,14 +218,22 @@ export const verifyAndGenerateAccessToken = asyncHandler (
       // Redis is not ready
       else {
         logger.warn('Redis Server is not connected or seems offline.')
-        const session = await sqlQuery(`CALL getSession(?)`, [data.sessionid])
+        const userdata = await sqlQuery(`CALL getUserFromSessionId(?)`, [data.sessionid])
         // MySQL found the session in the database
-        if (session instanceof Array) {
-
-          // const accessToken = generateAccessToken()
-          // res.status(OK).json(
-          //   new ApiResponse(OK, [accessToken], 'Access token generated successfully')
-          // )
+        if (userdata instanceof Array) {
+          const [result] = userdata[0] as any[]
+          if (result.userid === undefined) throw new ApiError(UNAUTHORIZED, 'Session not found')
+          const accessPayload: AccessTokenPayload = {
+            userid: result.userid,
+            sessionid: data.sessionid
+          }
+          const accessToken = generateAccessToken(accessPayload)
+          res
+            .cookie('access_token', accessToken, accessTokenOptions)
+            .status(OK)
+            .json(
+              new ApiResponse(OK, [accessToken], 'Access token generated successfully')
+            )
         }
         // MySQL did not find the session in the database
         else {

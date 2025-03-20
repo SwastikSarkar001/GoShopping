@@ -56,6 +56,10 @@ type InputProps = {
   changeData: (e: React.ChangeEvent<HTMLInputElement>) => void
   /** Whether the input is required. */
   required?: boolean
+  /** Whether the given data is valid or not */
+  isValid?: boolean
+  /** Whether the given data is invalid or not */
+  isInvalid?: boolean
   /** The pattern to validate the input. */
   pattern?: string
   /** The suggestions to be displayed in the input. */
@@ -65,9 +69,22 @@ type InputProps = {
 }
 
 /** Renders a text input with an id, label and optional logo. */
-export function InputText({ label, id, name, inputClassName, Logo, data, changeData, required, pattern, suggestions }: InputProps) {
+export function InputText({
+  label,
+  id,
+  name,
+  inputClassName,
+  Logo,
+  data,
+  changeData,
+  isValid,
+  isInvalid,
+  required,
+  pattern,
+  suggestions
+}: InputProps) {
   return (
-    <label htmlFor={ id } className="bg-gray-300/20 invalid:bg-red-300/20 p-4 rounded-2xl flex items-center gap-4">
+    <label htmlFor={ id } className={`${isInvalid ? 'bg-red-300/20' : isValid ? 'bg-green-300/20' : 'bg-gray-300/20'} p-4 rounded-2xl flex items-center gap-4`}>
       <input
         type="text"
         id={ id }

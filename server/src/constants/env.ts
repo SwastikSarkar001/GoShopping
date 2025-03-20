@@ -23,6 +23,7 @@ export const MYSQL_HOST = getEnv('MYSQL_HOST');
 export const MYSQL_USER = getEnv('MYSQL_USER')
 export const MYSQL_PASSWORD = getEnv('MYSQL_PASSWORD')
 export const MYSQL_DATABASE = getEnv('MYSQL_DATABASE')
+export const MYSQL_SECRET_KEY = getEnv('MYSQL_SECRET_KEY')
 export const APP_URL = getEnv('APP_URL')
 export const ACCESS_TOKEN_SECRET = getEnv('ACCESS_TOKEN_SECRET')
 export const REFRESH_TOKEN_SECRET = getEnv('REFRESH_TOKEN_SECRET')

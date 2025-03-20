@@ -67,7 +67,7 @@ export const getFeatures = asyncHandler(
         else {
           logger.warn('Redis does not have the data')
           /* Implement MySQL Logic */
-          const sqlData = await sqlQuery('CALL getAllFeatures()')
+          const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(0)')
           if (sqlData instanceof Array) {
             if (sqlData[0] instanceof Array) {
               const sqlFeatures = sqlData[0]
@@ -101,7 +101,7 @@ export const getFeatures = asyncHandler(
       }
       else {
         logger.warn('Redis is not ready yet')
-        const sqlData = await sqlQuery('CALL getAllFeatures()')
+        const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(0)')
         if (sqlData instanceof Array) {
           if (sqlData[0] instanceof Array) {
             const features = sqlData[0]
@@ -152,7 +152,7 @@ export const getTiers = asyncHandler(
         else {
           logger.warn('Redis does not have the data')
           /* Implement MySQL Logic */
-          const sqlData = await sqlQuery('CALL getAllTiers()')
+          const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(1)')
           if (sqlData instanceof Array) {
             if (sqlData[0] instanceof Array) {
               const sqlTiers = sqlData[0]
@@ -187,7 +187,7 @@ export const getTiers = asyncHandler(
       }
       else {
         logger.warn('Redis is not ready yet')
-        const sqlData = await sqlQuery('CALL getAllTiers()')
+        const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(1)')
         if (sqlData instanceof Array) {
           if (sqlData[0] instanceof Array) {
             const tiers = sqlData[0]

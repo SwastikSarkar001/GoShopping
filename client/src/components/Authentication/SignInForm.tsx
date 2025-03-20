@@ -57,7 +57,7 @@ export default function SignInForm({
     <div className='bg-white rounded-2xl flex flex-col items-center justify-center relative h-full'>
       <h1 className="font-bold text-3xl font-source-serif">Welcome Back!</h1>
       <p className="text-gray-400">Sign in to your account</p>
-      <form className="flex flex-col gap-4 w-[70%] mt-8" method='post'>
+      <form className="flex flex-col gap-4 w-[90%] md:w-[75%] mt-8" method='post'>
         <InputEmail
           id='regemail'
           name='email'

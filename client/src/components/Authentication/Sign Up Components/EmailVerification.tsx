@@ -172,6 +172,7 @@ export default function EmailVerification({
       <Button
         disabled={ disableAll || isEmailFieldUnchanged || (data.email.trim() === '' || !emailRegex.test(data.email)) }
         onClickPromised={ getDataAndSendOtp }
+        className="bg-black text-white"
         text='Confirm and Send OTP'
         Icon={
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[1em]">
@@ -195,6 +196,7 @@ export default function EmailVerification({
           </svg>
         }
         onClickPromised={ getDataAndSendOtp }
+        className="bg-black text-white"
         disabled = { disableAll || !isEmailFieldUnchanged || !resendOtp }
       />
     </div>
