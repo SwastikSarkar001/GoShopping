@@ -1,26 +1,26 @@
 import { useAppSelector } from "../../../../states/store";
-import { IoIosContact, IoIosSettings, IoMdCart, IoIosStats } from "react-icons/io";
+import { FaUserCog, FaRegCalendarCheck, FaMoneyBillAlt, FaFileAlt } from "react-icons/fa";
 
 const details = [
   {
-    title: "360° Customer View",
-    description: "Access comprehensive customer profiles and detailed interaction histories at a glance.",
-    icon: <IoIosContact className="fill-blue-500" />
+    title: "Automated Payroll Management",
+    description: "Process employee salaries accurately and on time with automated payroll workflows.",
+    icon: <FaMoneyBillAlt className="fill-yellow-500" />
   },
   {
-    title: "Automated Workflows",
-    description: "Streamline your sales process with smart automation and seamless follow-ups.",
-    icon: <IoIosSettings className="fill-green-500" />
+    title: "Leave & Attendance Tracking",
+    description: "Track employee attendance, manage leave requests, and ensure compliance effortlessly.",
+    icon: <FaRegCalendarCheck className="fill-blue-500" />
   },
   {
-    title: "Sales Pipeline Management",
-    description: "Visualize and manage your sales funnel to close deals faster with intuitive tools.",
-    icon: <IoMdCart className="fill-purple-500" />
+    title: "Seamless Recruitment & Onboarding",
+    description: "Manage hiring, interviews, and onboarding smoothly with intuitive tools.",
+    icon: <FaUserCog className="fill-green-500" />
   },
   {
-    title: "Custom Reporting & Analytics",
-    description: "Generate actionable insights with tailored reports and real-time data analysis.",
-    icon: <IoIosStats className="fill-orange-500" />
+    title: "Custom Reports & Analytics",
+    description: "Generate insightful reports to track employee performance and make data-driven decisions.",
+    icon: <FaFileAlt className="fill-red-500" />
   }
 ];
 

@@ -14,6 +14,7 @@ export type ColorSchemeType = {
   bg: string;
   bgHover: string,
   text: string;
+  textHover: string
 }
 
 const colorSchemes: Record<string, ColorSchemeType> = {
@@ -22,12 +23,21 @@ const colorSchemes: Record<string, ColorSchemeType> = {
     bg: 'bg-blue-500',
     bgHover: 'hover:bg-blue-500',
     text: 'text-blue-500',
+    textHover: 'hover:text-blue-500'
   },
   'eazzy-crm': {
     bgGrad: 'bg-gradient-to-r from-emerald-600 to-green-900',
     bg: 'bg-emerald-600',
     bgHover: 'hover:bg-emerald-600',
     text: 'text-emerald-600',
+    textHover: 'hover:text-emerald-600'
+  },
+  'eazzy-hr': {
+    bgGrad: 'bg-gradient-to-r from-rose-600 to-rose-800',
+    bg: 'bg-rose-600',
+    bgHover: 'hover:bg-rose-600',
+    text: 'text-rose-600',
+    textHover: 'hover:text-rose-600'
   },
 }
 
@@ -40,7 +50,7 @@ export type QnAType = {
 const sectionComponents: Record<string, React.ReactNode> = {
   'eazzy-chat': <ChatApp colorScheme={colorSchemes['eazzy-chat']} />,
   'eazzy-crm': <CRMApp colorScheme={colorSchemes['eazzy-crm']} />,
-  'eazzy-hr': <HRApp />,
+  'eazzy-hr': <HRApp colorScheme={colorSchemes['eazzy-hr']} />,
   'eazzy-books': <UpcomingFeatures />,
   'eazzy-manufacturing': <UpcomingFeatures />,
   'inventory-management': <UpcomingFeatures />,

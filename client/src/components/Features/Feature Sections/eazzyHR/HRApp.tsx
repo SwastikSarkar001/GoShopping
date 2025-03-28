@@ -10,14 +10,48 @@ import { useAnimation } from "framer-motion";
 import { useAppSelector } from "../../../../states/store";
 import ShowTiers from "./ShowTiers"
 import { useGetUserPlansQuery } from "../../../../states/apis/plansApiSlice"
+import { ColorSchemeType } from "../../Feature"
 
 export type HRComponentProps = {
+  colorScheme: ColorSchemeType,
   isAuthenticated: boolean,
   componentNumber: number,
   setComponentNumber: React.Dispatch<React.SetStateAction<number>>
 }
 
-export default function HRApp() {
+
+const qna = [
+  {
+    question: "What is eazzyHR?",
+    answer: "eazzyHR is a human resources management platform that automates and simplifies all HR-related processes, from recruitment to payroll, for businesses of all sizes."
+  },
+  {
+    question: "Who can use eazzyHR?",
+    answer: "eazzyHR is perfect for businesses of all sizes that want to manage their human resources more effectively and reduce manual effort."
+  },
+  {
+    question: "Does eazzyHR support payroll automation?",
+    answer: "Yes! eazzyHR automates the entire payroll process, ensuring timely and accurate salary processing."
+  },
+  {
+    question: "How does eazzyHR handle leave and attendance tracking?",
+    answer: "eazzyHR provides a centralized dashboard to manage employee leave requests and track attendance in real time."
+  },
+  {
+    question: "Can I customize reports in eazzyHR?",
+    answer: "Absolutely! eazzyHR allows you to create and customize reports to analyze employee data and make informed decisions."
+  },
+  {
+    question: "How secure is eazzyHR?",
+    answer: "Security is a priority for eazzyHR. We implement industry-standard encryption and data protection measures to safeguard sensitive information."
+  },
+  {
+    question: "Is there a free trial available?",
+    answer: "Yes! You can explore eazzyHR with a free trial and experience the benefits before committing."
+  }
+];
+
+export default function HRApp({ colorScheme }: { colorScheme: ColorSchemeType }) {
   const [scrolled, setScrolled] = useState(false)
   const handleScroll = () => {
     const scrollThreshold = window.innerHeight * 0.15; // 15% of viewport height
@@ -95,11 +129,11 @@ export default function HRApp() {
   return (
     <main className="min-h-screen flex flex-col items-stretch [&>:nth-last-child(2)]:mb-auto [&>:first-child]:fixed">
       <Navbar ref={ref} animate={controls} />
-      <HeroSection isAuthenticated={isAuthenticated} componentNumber={componentNumber} setComponentNumber={setComponentNumber} />
+      <HeroSection colorScheme={colorScheme} isAuthenticated={isAuthenticated} componentNumber={componentNumber} setComponentNumber={setComponentNumber} />
       <AppFeatures />
-      <ShowTiers />
-      <FAQs />
-      <CTA isAuthenticated={isAuthenticated} componentNumber={componentNumber} setComponentNumber={setComponentNumber} />
+      <ShowTiers colorScheme={colorScheme} />
+      <FAQs qna={qna} />
+      <CTA colorScheme={colorScheme} isAuthenticated={isAuthenticated} componentNumber={componentNumber} setComponentNumber={setComponentNumber} />
       <Footer />
     </main>
   )

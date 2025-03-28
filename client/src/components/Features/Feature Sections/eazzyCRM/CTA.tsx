@@ -26,7 +26,7 @@ export default function CTA({ colorScheme, isAuthenticated, componentNumber }: C
       </Link>
       <button
         onClick={startTrial}
-        className={`${ colorScheme.bg } border-2 border-white text-white font-semibold px-6 py-3 rounded-md shadow-md hover:bg-white ${ colorScheme.text } hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4`}
+        className={`${ colorScheme.bg } border-2 border-white text-white ${ colorScheme.textHover } font-semibold px-6 py-3 rounded-md shadow-md hover:bg-white ${ colorScheme.text } hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4`}
       >
         Start Free Trial
       </button>
@@ -40,7 +40,7 @@ export default function CTA({ colorScheme, isAuthenticated, componentNumber }: C
         Upgrade to a Higher Plan
       </Link>
       <button
-        className={`${ colorScheme.bg } border-2 border-white text-white font-semibold px-6 py-3 rounded-md shadow-md hover:bg-white ${ colorScheme.text } hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4`}
+        className={`${ colorScheme.bg } border-2 border-white text-white ${ colorScheme.textHover } font-semibold px-6 py-3 rounded-md shadow-md hover:bg-white ${ colorScheme.text } hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4`}
       >
         View Dashboard
       </button>
