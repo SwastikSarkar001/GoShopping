@@ -1,9 +1,10 @@
+import { ColorSchemeType } from "../../Feature"
 import CTASvg from "./CTASvg"
 import { Link } from 'react-router-dom'
 
-export default function CTA() {
+export default function CTA({ colorScheme }: { colorScheme: ColorSchemeType }) {
   return (
-    <section className="bg-linear-to-r from-blue-500 to-indigo-600 text-white py-16 px-8 md:px-16">
+    <section className={`${ colorScheme.bgGrad } text-white py-16 px-8 md:px-16`}>
       <div className="container mx-auto flex flex-col md:flex-row items-center gap-8 lg:gap-16 justify-center md:justify-between">
         {/* Text Section */}
         <div className="md:w-1/2 text-center md:text-left">
@@ -16,7 +17,7 @@ export default function CTA() {
           <div className="flex flex-col md:flex-row items-center md:items-start">
             <Link
               to="/auth"
-              className="bg-white border-2 border-white text-blue-600 font-semibold px-6 py-3 rounded-md shadow-md hover:bg-blue-500 hover:text-white hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4"
+              className={`bg-white border-2 border-white ${ colorScheme.text } font-semibold px-6 py-3 rounded-md shadow-md ${ colorScheme.bgHover } hover:text-white hover:shadow-lg hover:scale-105 active:scale-90 transition-all mb-4 md:mb-0 md:mr-4`}
             >
               Get Started for Free
             </Link>

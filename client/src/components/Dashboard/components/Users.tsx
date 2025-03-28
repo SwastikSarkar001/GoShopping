@@ -19,12 +19,10 @@ type UserInfo = {
 
 type CustomerDataType = {
   slno: number,
-  customer_id: number,
   module_id: number,
   tier_id: number,
-  payment_date: string,
+  start_date: string,
   subscription_status: "Monthly" | "Yearly",
-  user_status: number,
   expiry: number,
   featurenum: number,
   featureid: string,
@@ -420,7 +418,8 @@ export default function Users() {
                   <div className="px-4 *:not-first:justify-self-start *:not-first:mb-1">
                     <h2 className='text-2xl mb-1 text-center font-source-serif'>Roles</h2>
                     {
-                      roles && roles.map(
+                      roles.length ?
+                      roles.map(
                         (role, i) => {
                           return (
                             <CheckBox
@@ -434,13 +433,16 @@ export default function Users() {
                             />
                           )
                         }
+                      ) : (
+                        <div className="text-center w-full text-gray-400">No roles available</div>
                       )
                     }
                   </div>
                   <div className="px-4 *:not-first:justify-self-start *:not-first:mb-1">
                     <h2 className='text-2xl mb-1 text-center font-source-serif'>Modules</h2>
                     {
-                      modules && modules.map((module, i) => {
+                      modules.length ?
+                      modules.map((module, i) => {
                         return (
                           <CheckBox
                             key={i}
@@ -452,7 +454,9 @@ export default function Users() {
                             toggler={e => handleCheckboxChange(e, "modules")}
                           />
                         )
-                      })
+                      }) : (
+                        <div className="text-center w-full text-gray-400">No modules available</div>
+                      )
                     }
                   </div>
                 </div>

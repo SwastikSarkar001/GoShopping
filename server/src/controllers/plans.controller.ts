@@ -67,7 +67,7 @@ export const getFeatures = asyncHandler(
         else {
           logger.warn('Redis does not have the data')
           /* Implement MySQL Logic */
-          const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(0)')
+          const sqlData = await sqlQuery('CALL get_all_features_or_tiers(0)')
           if (sqlData instanceof Array) {
             if (sqlData[0] instanceof Array) {
               const sqlFeatures = sqlData[0]
@@ -101,7 +101,7 @@ export const getFeatures = asyncHandler(
       }
       else {
         logger.warn('Redis is not ready yet')
-        const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(0)')
+        const sqlData = await sqlQuery('CALL get_all_features_or_tiers(0)')
         if (sqlData instanceof Array) {
           if (sqlData[0] instanceof Array) {
             const features = sqlData[0]
@@ -152,7 +152,7 @@ export const getTiers = asyncHandler(
         else {
           logger.warn('Redis does not have the data')
           /* Implement MySQL Logic */
-          const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(1)')
+          const sqlData = await sqlQuery('CALL get_all_features_or_tiers(1)')
           if (sqlData instanceof Array) {
             if (sqlData[0] instanceof Array) {
               const sqlTiers = sqlData[0]
@@ -187,7 +187,7 @@ export const getTiers = asyncHandler(
       }
       else {
         logger.warn('Redis is not ready yet')
-        const sqlData = await sqlQuery('CALL getAllFeaturesOrTiers(1)')
+        const sqlData = await sqlQuery('CALL get_all_features_or_tiers(1)')
         if (sqlData instanceof Array) {
           if (sqlData[0] instanceof Array) {
             const tiers = sqlData[0]
@@ -221,6 +221,20 @@ export const getTiers = asyncHandler(
   }
 )
 
+export const startTrial = asyncHandler(
+  async (req, res, next) => {
+    try {
+      type RequestData = { __verifiedData: AccessTokenPayload }
+      const reqData = req.body
+      const { __verifiedData }: RequestData = reqData
+      
+    }
+    catch(err) {
+      next(err)
+    }
+  }
+)
+
 export const purchasePlan = asyncHandler(
   async (req, res, next) => {
     try {
@@ -234,7 +248,7 @@ export const purchasePlan = asyncHandler(
       const { subscription, data } = rest
       
       
-      sqlQuery('CALL purchasePlan(?, ?, ?)', [subscription, __verifiedData.userid, JSON.stringify(data)])
+      sqlQuery('CALL purchase_plan(?, ?, ?)', [subscription, __verifiedData.userid, JSON.stringify(data)])
       .then(() => {
         res
           .status(OK)
@@ -255,28 +269,89 @@ export const getUserPlans = asyncHandler(
   async (req, res, next) => {
     try {
       type RequestData = { __verifiedData: AccessTokenPayload }
+      type SubscriptionHistoryType = {
+        [key: string]: ({
+          subId: number,
+          subStatus: 'Trial',
+          startDate: Date,
+          endDate: Date,
+          userStatus: 'Active' | 'Pending' | 'Cancelled' | 'Expired',
+        } | {
+          subId: number,
+          subStatus: 'Monthly' | 'Yearly',
+          tierId: number,
+          paymentDate: Date,
+          startDate?: Date,
+          endDate?: Date,
+          userStatus: 'Active' | 'Pending' | 'Cancelled' | 'Expired' | 'Ongoing',
+        })[]
+      }
 
       const reqData = req.body
       const { __verifiedData }: RequestData = reqData
       
-      const sqlData = await sqlQuery('CALL getUserPlans(?)', [__verifiedData.userid])
-      console.log(sqlData)
-      throw new ApiError(INTERNAL_SERVER_ERROR, 'User plans cannot be fetched')
-      // if (sqlData instanceof Array) {
-      //   if (sqlData[0] instanceof Array) {
-      //     res
-      //       .status(OK)
-      //       .json(new ApiResponse(OK, [], 'User plans fetched successfully'))
-      //   }
-      //   else {
-      //     logger.error('User plans cannot be fetched')
-      //     throw new ApiError(INTERNAL_SERVER_ERROR, 'User plans cannot be fetched')
-      //   }
-      // }
-      // else {
-      //   logger.error('User plans cannot be fetched')
-      //   throw new ApiError(INTERNAL_SERVER_ERROR, 'User plans cannot be fetched')
-      // }
+      const sqlData = await sqlQuery('CALL get_all_user_plans(?)', [__verifiedData.userid])
+      if (sqlData instanceof Array) {
+        const [result] = sqlData
+        const results: {
+          id: number,
+          module_id: string,
+          tier_id: number,
+          payment_date: Date | null,
+          start_date: Date | null,
+          end_date: Date | null,
+          sub_status: 'Trial' | 'Monthly' | 'Yearly',
+          user_status: 'Active' | 'Pending' | 'Cancelled' | 'Expired' | 'Ongoing'
+        }[] = result.map(r => ({
+          id: r.id,
+          module_id: r.module_id,
+          tier_id: r.tier_id,
+          payment_date: r.payment_date,
+          start_date: r.start_date,
+          end_date: r.end_date,
+          sub_status: r.sub_status,
+          user_status: r.user_status
+        }))
+
+        const finalData: SubscriptionHistoryType = {}
+
+        results.forEach(r => {
+          const moduleId = r.module_id;
+
+          // Initialize the array for this module_id if it doesn’t exist
+          if (!finalData[moduleId]) {
+            finalData[moduleId] = [];
+          }
+
+          if (r.sub_status === 'Trial') {
+            // Trial entry
+            finalData[moduleId].push({
+              subId: r.id,
+              subStatus: 'Trial',
+              startDate: r.start_date!,
+              endDate: r.end_date!,
+              userStatus: r.user_status as 'Active' | 'Pending' | 'Cancelled' | 'Expired',
+            });
+          } else {
+            // Subscription entry (Monthly or Yearly)
+            finalData[moduleId].push({
+              subId: r.id,
+              subStatus: r.sub_status as 'Monthly' | 'Yearly',
+              tierId: r.tier_id,
+              paymentDate: r.payment_date!,
+              startDate: r.start_date!,
+              endDate: r.end_date!,
+              userStatus: r.user_status as 'Active' | 'Pending' | 'Cancelled' | 'Expired' | 'Ongoing',
+            });
+          }
+        });
+
+        res.status(OK).json(new ApiResponse(OK, [finalData], 'User plans fetched successfully'))
+      }
+      else {
+        logger.error('User plans cannot be fetched')
+        throw new ApiError(INTERNAL_SERVER_ERROR, 'User plans cannot be fetched')
+      }
     }
     catch(err) {
       next(err)

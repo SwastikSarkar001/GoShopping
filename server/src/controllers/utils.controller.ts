@@ -39,7 +39,7 @@ export const isUserExists = async (field: 'email' | 'phone' | 'sitename', value:
 
     /* If user does not exist then check from MySQL database */
     else if (data[0] == 0) {
-      const sqlData = await sqlQuery(`CALL getAllUserDetails(?, ?)`, [field, value])
+      const sqlData = await sqlQuery(`CALL get_all_user_details(?, ?)`, [field, value])
       /* If there exist a data then return the data, cache it and return true */
       if (sqlData instanceof Array) {
         /* If no data is found return false */
@@ -71,7 +71,7 @@ export const isUserExists = async (field: 'email' | 'phone' | 'sitename', value:
 
   /* If Redis is not ready then check from MySQL database */
   else {
-    const sqlData = await sqlQuery(`CALL getAllUserDetails(?, ?)`, [field, value])
+    const sqlData = await sqlQuery(`CALL get_all_user_details(?, ?)`, [field, value])
 
     /* If there exist a data then return the data and return true */
     if (sqlData instanceof Array) {
@@ -114,7 +114,7 @@ export const verifyFieldAndSendOtp = asyncHandler (
 
           /* Store OTP in MySQL Database */
           else {
-            await sqlQuery(`CALL addOtp(?, ?, ?)`, [field, value, otp])
+            await sqlQuery(`CALL add_otp(?, ?, ?)`, [field, value, otp])
           }
 
           /* Making an event to send email to user */
@@ -175,7 +175,7 @@ export const verifyOtp = asyncHandler (
 
       /* If Redis is not ready then check from MySQL database */
       else {
-        const responseData = await sqlQuery('CALL deleteOtp(?, ?, ?)', [field, value, otp])
+        const responseData = await sqlQuery('CALL delete_otp(?, ?, ?)', [field, value, otp])
         if (responseData instanceof Array) {
           const [resData] = responseData[0] as any[]
           if (resData === undefined) throw new ApiError(UNAUTHORIZED, 'Incorrect or invalid OTP')

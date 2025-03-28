@@ -114,3 +114,32 @@ export type FeaturesResponse = {
   /** Success status of the response */
   success: boolean
 }
+
+type SubscriptionHistoryType = {
+  [key: string]: ({
+    subId: number,
+    subStatus: 'Trial',
+    startDate: Date,
+    endDate: Date,
+    userStatus: 'Active' | 'Pending' | 'Cancelled' | 'Expired',
+  } | {
+    subId: number,
+    subStatus: 'Monthly' | 'Yearly',
+    tierId: number,
+    paymentDate: Date,
+    startDate?: Date,
+    endDate?: Date,
+    userStatus: 'Active' | 'Pending' | 'Cancelled' | 'Expired' | 'Ongoing',
+  })[]
+}
+
+export type UserPlansResponse = {
+  /** Status code of the response */
+  statusCode: number,
+  /** Data from the server */
+  data: [SubscriptionHistoryType],
+  /** Message from the server */
+  message: string,
+  /** Success status of the response */
+  success: boolean
+}

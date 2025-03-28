@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { CurrencyDisplay, TierFeatureDetail } from "./Pricing"
 import { tierAndPriceCalculator } from "./utilities"
 import { useAppSelector } from "../../states/store"
@@ -7,6 +7,7 @@ import { TierData } from "../../types"
 import { toast } from "sonner"
 import axios from "axios"
 import performProtectedRequest from "../../utilities/performProtectedRequest"
+import CurrencyExchangeContext, { CurrencyProps } from "../../contexts/CurrencyExchangeContext"
 
 type PlanSummaryProps = {
   features: TierFeatureDetail[],
@@ -88,7 +89,8 @@ type summaryProps = {
   fetchingData: boolean
 }
 
-function SummaryWrapper({ title, checkedFeatures, isLoadingFeatures, tiers, isLoadingTiers, fetchingData }: summaryProps) {
+function SummaryWrapper({ title, checkedFeatures, tiers, fetchingData }: summaryProps) {
+  const { name } = useContext(CurrencyExchangeContext) as CurrencyProps
   /** GST applied */
   const gst = 18
 
@@ -102,10 +104,10 @@ function SummaryWrapper({ title, checkedFeatures, isLoadingFeatures, tiers, isLo
   const totalDiscountedPrice = discountedPrice * (title === 'Monthly Plan' ? 1 : 1 - 0.01*annualDiscount)
 
   /** Total original price after applying GST (in INR) */
-  const originalPayableAmount = originalPrice * (1 + 0.01*gst)
+  const originalPayableAmount = originalPrice * (name === 'INR' ? (1 + 0.01*gst) : 1)
 
   /** Total discounted price after applying annual discount and GST (in INR) */
-  const payableAmount = totalDiscountedPrice * (1 + 0.01*gst)
+  const payableAmount = totalDiscountedPrice * (name === 'INR' ? (1 + 0.01*gst) : 1)
 
   useEffect(() => {
     let original_value = 0

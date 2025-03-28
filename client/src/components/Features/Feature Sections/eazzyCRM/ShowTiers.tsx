@@ -7,8 +7,9 @@ import ErrorFetching from "../../../Utilities/ErrorFetching";
 import { PiConfetti } from "react-icons/pi";
 import { TbMoneybag } from "react-icons/tb";
 import { HiX } from "react-icons/hi";
+import { ColorSchemeType } from "../../Feature";
 
-export default function ShowTiers() {
+export default function ShowTiers({ colorScheme }: { colorScheme: ColorSchemeType }) {
   const scrollableRef = useRef<HTMLDivElement>(null);
 
   // Scroll left by the width of the window
@@ -53,7 +54,7 @@ export default function ShowTiers() {
   }
 
   return (
-    <section className="flex text-white flex-col items-stretch gap-16 py-16 px-8 bg-linear-to-r from-emerald-600 to-green-900 mb-20">
+    <section className={`flex text-white flex-col items-stretch gap-16 py-16 px-8 ${ colorScheme.bgGrad } mb-20`}>
       <div className="flex items-center justify-between gap-3 sm:gap-6">
           <h1 className='text-3xl sm:text-4xl self-center font-bold font-source-serif'>Tier Offerings</h1>
         <div className="flex gap-3 sm:gap-6 items-center">

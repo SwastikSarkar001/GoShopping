@@ -52,12 +52,15 @@ export const addUser = asyncHandler (
         if (await isUserExists('phone', userdata.phone)) {
           throw new ApiError(CONFLICT, 'The provided phone number is already in use. Please use a different phone number.')
         }
+        if (await isUserExists('sitename', userdata.sitename)) {
+          throw new ApiError(CONFLICT, 'The provided sitename is already in use. Please use a different sitename.')
+        }
 
         /* Prepare the values to insert into the database */
         const values = [...Object.values(userdata), userAgent, MYSQL_SECRET_KEY]
 
         /* Insert user data into database and get the result */
-        const results = await sqlQuery(`CALL addUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
+        const results = await sqlQuery(`CALL create_new_customer(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, values)
         /* If user added successfully then return the user data */
         if (results instanceof Array) {
           const [result] = results[0] as returnType[]
@@ -191,7 +194,7 @@ export const verifyAndGenerateAccessToken = asyncHandler (
         
         // Redis did not find the session in the database
         else {
-          const userdata = await sqlQuery(`CALL getUserFromSessionId(?)`, [data.sessionid])
+          const userdata = await sqlQuery(`CALL get_user_from_session_id(?)`, [data.sessionid])
           
           // MySQL found the session in the database
           if (userdata instanceof Array) {
@@ -218,7 +221,7 @@ export const verifyAndGenerateAccessToken = asyncHandler (
       // Redis is not ready
       else {
         logger.warn('Redis Server is not connected or seems offline.')
-        const userdata = await sqlQuery(`CALL getUserFromSessionId(?)`, [data.sessionid])
+        const userdata = await sqlQuery(`CALL get_user_from_session_id(?)`, [data.sessionid])
         // MySQL found the session in the database
         if (userdata instanceof Array) {
           const [result] = userdata[0] as any[]
@@ -253,7 +256,7 @@ export const verifyAndGenerateAccessToken = asyncHandler (
  * This function performs the following steps:
  * 1. Validates the user data from the request body using the `UserSchema`.
  * 2. Checks if the user exists in the database by calling the `signIn` stored procedure.
- * 3. If the user exists, creates a session for the user by calling the `createSession` stored procedure.
+ * 3. If the user exists, creates a session for the user by calling the `create_session` stored procedure.
  * 4. Caches the user and session data in Redis if Redis is ready.
  * 5. Generates access and refresh tokens for the user.
  * 6. Sends the response with the tokens and user data.
@@ -274,9 +277,9 @@ export const signIn = asyncHandler (
       }
 
       // Check if the user exists in the database
-      const results = await sqlQuery(`CALL signIn(?, ?)`, [userdata.email, userdata.password])
-      if (results instanceof Array) {
-        const [result] = results[0] as UserWithUserid[]
+      const userResults = await sqlQuery(`CALL sign_in_customer(?, ?)`, [userdata.email, userdata.password])
+      if (userResults instanceof Array) {
+        const [result] = userResults[0] as UserWithUserid[]
         const user = UserSchema.pick({
             userid: true,
             firstname: true,
@@ -291,7 +294,7 @@ export const signIn = asyncHandler (
         ).parse(result)
         const {userid, ...rest} = user
         const userAgent = req.headers['user-agent'] as string
-        const sessionResults = await sqlQuery(`CALL createSession(?, ?)`, [userid, userAgent])
+        const sessionResults = await sqlQuery(`CALL create_session(?, ?)`, [userid, userAgent])
         if (sessionResults instanceof Array) {
           const [sessionResult] = sessionResults[0] as any[]
           if (sessionResult === undefined) throw new ApiError(UNAUTHORIZED, 'Problem creating session')
@@ -355,7 +358,7 @@ export const signOut = asyncHandler (
       const data = req.body.__verifiedData
 
       // Check if the session exists in the database
-      const results = await sqlQuery(`CALL signOut(?)`, [data.sessionid]) as ResultSetHeader
+      const results = await sqlQuery(`CALL sign_out_customer(?)`, [data.sessionid]) as ResultSetHeader
       if (results  === undefined) throw new ApiError(UNAUTHORIZED, 'Session not found')
       redis.status === 'ready' &&
       await redis.del(`sessions:${data.sessionid}`)
@@ -404,7 +407,7 @@ export const getUserData = asyncHandler (
           return
         }
       }
-      const sqlRes = await sqlQuery(`CALL getUserAndSessionData(?)`, [data.sessionid])
+      const sqlRes = await sqlQuery(`CALL get_user_and_session_data(?)`, [data.sessionid])
       if (sqlRes instanceof Array) {
         const [result] = sqlRes[0] as any[]
         if (result === undefined) throw new ApiError(UNAUTHORIZED, 'Session not found')

@@ -37,28 +37,28 @@ export const userSlice = createSlice({
   name: 'userdata',
   initialState: defaultUserProfile,
   reducers: {
-    setFirstName: (state, action: PayloadAction<string>) => {
+    setFirstName: (state, action: PayloadAction<UserData['firstName']>) => {
       state.data.firstName = action.payload;
     },
-    setMiddleName: (state, action: PayloadAction<string | undefined>) => {
+    setMiddleName: (state, action: PayloadAction<UserData['middleName'] | undefined>) => {
       state.data.middleName = action.payload
     },
-    setLastName: (state, action: PayloadAction<string>) => {
+    setLastName: (state, action: PayloadAction<UserData['lastName']>) => {
       state.data.lastName = action.payload
     },
-    setEmail: (state, action: PayloadAction<string>) => {
+    setEmail: (state, action: PayloadAction<UserData['email']>) => {
       state.data.email = action.payload
     },
-    setPhone: (state, action: PayloadAction<string>) => {
+    setPhone: (state, action: PayloadAction<UserData['phone']>) => {
       state.data.phone = action.payload
     },
-    setCity: (state, action: PayloadAction<string>) => {
+    setCity: (state, action: PayloadAction<UserData['city']>) => {
       state.data.city = action.payload
     },
-    setState: (state, action: PayloadAction<string>) => {
+    setState: (state, action: PayloadAction<UserData['state']>) => {
       state.data.state = action.payload
     },
-    setCountry: (state, action: PayloadAction<string>) => {
+    setCountry: (state, action: PayloadAction<UserData['country']>) => {
       state.data.country = action.payload
     }
   },
@@ -144,10 +144,11 @@ export const createUserAccount = createAsyncThunk(
       lastname: userdata.lname,
       email: userdata.email,
       phone: userdata.phone,
+      sitename: userdata.sitename,
       city: userdata.city,
       state: userdata.state,
       country: userdata.country,
-      password: userdata.password
+      password: userdata.password,
     }
     const response = await axios.post(
       `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/register`,
@@ -353,7 +354,7 @@ export const {
   setPhone,
   setCity,
   setState,
-  setCountry,
+  setCountry
 } = userSlice.actions
 
 export type UserData = typeof defaultUserProfile['data']

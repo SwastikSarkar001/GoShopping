@@ -7,18 +7,46 @@ import CRMApp from './Feature Sections/eazzyCRM/CRMApp';
 import UpcomingFeatures from './Feature Sections/UpcomingFeatures';
 import Loading from '../Utilities/Loading';
 import ErrorFetching from '../Utilities/ErrorFetching';
+import HRApp from './Feature Sections/eazzyHR/HRApp';
+
+export type ColorSchemeType = {
+  bgGrad: string;
+  bg: string;
+  bgHover: string,
+  text: string;
+}
+
+const colorSchemes: Record<string, ColorSchemeType> = {
+  'eazzy-chat': {
+    bgGrad: 'bg-gradient-to-r from-blue-500 to-indigo-600',
+    bg: 'bg-blue-500',
+    bgHover: 'hover:bg-blue-500',
+    text: 'text-blue-500',
+  },
+  'eazzy-crm': {
+    bgGrad: 'bg-gradient-to-r from-emerald-600 to-green-900',
+    bg: 'bg-emerald-600',
+    bgHover: 'hover:bg-emerald-600',
+    text: 'text-emerald-600',
+  },
+}
+
+export type QnAType = {
+  question: string;
+  answer: string;
+}
 
 // Mapping of featureIDs to their respective section components
-const sectionComponents: Record<string, () => React.ReactNode> = {
-  'eazzy-chat': ChatApp,
-  'eazzy-crm': CRMApp,
-  'eazzy-hr': UpcomingFeatures,
-  'eazzy-books': UpcomingFeatures,
-  'eazzy-manufacturing': UpcomingFeatures,
-  'inventory-management': UpcomingFeatures,
-  'sales-analytics': UpcomingFeatures,
-  'financial-management': UpcomingFeatures,
-  'supply-chain-management': UpcomingFeatures,
+const sectionComponents: Record<string, React.ReactNode> = {
+  'eazzy-chat': <ChatApp colorScheme={colorSchemes['eazzy-chat']} />,
+  'eazzy-crm': <CRMApp colorScheme={colorSchemes['eazzy-crm']} />,
+  'eazzy-hr': <HRApp />,
+  'eazzy-books': <UpcomingFeatures />,
+  'eazzy-manufacturing': <UpcomingFeatures />,
+  'inventory-management': <UpcomingFeatures />,
+  'sales-analytics': <UpcomingFeatures />,
+  'financial-management': <UpcomingFeatures />,
+  'supply-chain-management': <UpcomingFeatures />,
 };
 
 export default function Feature() {
@@ -71,7 +99,7 @@ export default function Feature() {
   // Render the section component and GoToTop
   return (
     <>
-      {SectionComponent && <SectionComponent />}
+      {SectionComponent && SectionComponent}
       <GoToTop scrolled={scrolled} />
     </>
   );

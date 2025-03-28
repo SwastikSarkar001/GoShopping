@@ -135,7 +135,7 @@ function SidebarNav() {
             </div>
           }
         {/* </AnimatePresence> */}
-        <button onClick={toggleSidebar} aria-label={ expanded ? 'Close Sidebar' : 'Open Sidebar' } className={`p-2 rounded-md hover:bg-gray-800 transition-colors`}>
+        <button onClick={toggleSidebar} aria-label={ expanded ? 'Close Sidebar' : 'Open Sidebar' } className={`p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors`}>
           {
             expanded ?
             <HiX className="size-5" /> :
@@ -208,7 +208,7 @@ function SidebarItem({ item }: SidebarItemProps) {
     <div>
       <div
         className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${
-          isActive ? "bg-indigo-700" : "hover:bg-gray-800"
+          isActive ? "bg-indigo-500 text-text-inversed dark:text-text dark:bg-indigo-700" : "hover:bg-gray-200 dark:hover:bg-gray-800"
         }`}
         onClick={() => {
           setActiveItem(item.id)
@@ -244,13 +244,13 @@ function SidebarItem({ item }: SidebarItemProps) {
               animate="open"
               exit="closed"
               variants={subMenuVariants}
-              className="overflow-hidden bg-gray-800"
+              className="overflow-hidden bg-gray-300 dark:bg-gray-800"
             >
               {item.subItems && item.subItems.map((subItem) => (
                 <div
                   key={subItem.id}
                   className={`flex items-center pl-12 pr-4 py-2 cursor-pointer transition-colors ${
-                    activeItem === subItem.id ? "bg-blue-700" : "hover:bg-gray-700"
+                    activeItem === subItem.id ? "text-text-inversed dark:text-text bg-blue-500 dark:bg-blue-700" : "hover:bg-gray-200"
                   }`}
                   onClick={() => setActiveItem(subItem.id)}
                 >

@@ -8,4 +8,5 @@ plansRoutes.get('/get-features', getFeatures)
 plansRoutes.get('/get-tiers', getTiers)
 plansRoutes.post('/purchase', accessProtectedRoute, purchasePlan)
 plansRoutes.get('/get-user-plans', accessProtectedRoute, getUserPlans)
+
 export default plansRoutes

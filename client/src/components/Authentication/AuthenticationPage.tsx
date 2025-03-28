@@ -103,7 +103,7 @@ export default function AuthenticationPage() {
   )
 
   // Sign Up Page Step state and dispatch function for updating the states
-  const [signUpPageStep, setSignUpPageStep] = useState(3)
+  const [signUpPageStep, setSignUpPageStep] = useState(1)
 
   // OTP state and dispatch function for updating the states
   const [savedData, setSavedData] = useState<{'email': string | null, 'sitename': string | null, 'phone': string | null}>({
@@ -191,7 +191,7 @@ export default function AuthenticationPage() {
   }, [openSignUp])
 
   return (
-    <main className="flex items-center justify-center h-screen bg-white">
+    <main id='authentication' className="flex items-center justify-center h-screen bg-white text-black">
       <div className="size-full md:w-[80vw] lg:w-[60vw] md:h-[80vh] shadow-2xl md:rounded-3xl overflow-hidden relative">
         <div id='sign-up-form' className={`bg-white form-container absolute size-full md:w-[60%] transition-all duration-[600ms] z-10 ${openSignUp ? 'left-0 md:left-[40%] opacity-100 pointer-events-auto' : '-left-full md:left-full opacity-0 pointer-events-none'}`}>
           <SignUpForm

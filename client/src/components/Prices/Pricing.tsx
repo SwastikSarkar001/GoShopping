@@ -1,6 +1,6 @@
 import Navbar from "../Features/Navbar"
 import axios from "axios"
-import React, { forwardRef, useEffect, useState, useReducer, createContext, useContext } from "react"
+import React, { forwardRef, useEffect, useState, useReducer, useContext } from "react"
 import CustomizeFeatures from "./CustomizeFeatures"
 import PlanSummary from "./PlanSummary"
 import GoToTop from "../Utilities/GoToTop"
@@ -9,6 +9,7 @@ import getSymbolFromCurrency from "currency-symbol-map"
 import { useGetFeaturesQuery, useGetTiersQuery } from "../../states/apis/plansApiSlice"
 import { FeatureDetail, TierData } from "../../types"
 import ErrorFetching from "../Utilities/ErrorFetching"
+import CurrencyExchangeContext, { CurrencyProps } from "../../contexts/CurrencyExchangeContext"
 
 export type TierFeatureDetail = FeatureDetail & {
   /**
@@ -26,24 +27,6 @@ export type TierFeatureDetail = FeatureDetail & {
    * @default 0 (Not selected)
    */
   tier: number;
-}
-
-type CurrencyProps = {
-  /** Country code of client */
-  name: string,
-  /** Conversion rate of INR to client's country's currency */
-  conversion: number
-  /** State function to set the currency */
-  setCurrency: React.Dispatch<React.SetStateAction<Currency>>
-};
-
-const CurrencyExchangeContext = createContext<CurrencyProps | undefined>(undefined);
-
-type Currency = {
-  /** Country code of client */
-  name: string,
-  /** Conversion rate of INR to client's country's currency */
-  conversion: number,
 }
 
 const initialCurrency = {
