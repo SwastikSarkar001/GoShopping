@@ -37,16 +37,19 @@ export default forwardRef<HTMLDivElement, emptyProps>(function ContactUs(props, 
           >
             <div>Email</div><div>{EmailValidator.validate(env.VITE_EMAIL_ADDRESS) ? env.VITE_EMAIL_ADDRESS : 'example@gmail.com'}</div>
           </motion.a>
-          <motion.a
-            className={isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? '' : "pointer-events-none"}
-            href={isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? `https://wa.me/${env.VITE_WHATSAPP_NUMBER}` : '/'}
-            target="_blank"
-            whileHover={{
-              scale: isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? 1.05 : 1
-            }}
-          >
-            <div>WhatsApp</div><div>{isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? formatPhoneNumberIntl(env.VITE_WHATSAPP_NUMBER ?? '') : defaultph}</div>
-          </motion.a>
+          {
+            env.VITE_WHATSAPP_NUMBER &&
+            <motion.a
+              className={isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? '' : "pointer-events-none"}
+              href={isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? `https://wa.me/${env.VITE_WHATSAPP_NUMBER}` : '/'}
+              target="_blank"
+              whileHover={{
+                scale: isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? 1.05 : 1
+              }}
+            >
+              <div>WhatsApp</div><div>{isValidPhoneNumber(env.VITE_WHATSAPP_NUMBER ?? '') ? formatPhoneNumberIntl(env.VITE_WHATSAPP_NUMBER ?? '') : defaultph}</div>
+            </motion.a>
+          }
         </div>
 
         { /* Uncomment when there will be social media platform */ }
