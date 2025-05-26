@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url("./fonts.css");
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
