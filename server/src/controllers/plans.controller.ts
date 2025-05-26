@@ -227,7 +227,7 @@ export const startTrial = asyncHandler(
       type RequestData = { __verifiedData: AccessTokenPayload }
       const reqData = req.body
       const { __verifiedData }: RequestData = reqData
-      
+      console.log(__verifiedData)
     }
     catch(err) {
       next(err)

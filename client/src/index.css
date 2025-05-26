@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url("./fonts.css");
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
@@ -23,7 +24,7 @@
   --font-roboto-flex: "Roboto Flex", sans-serif;
   --font-noto-serif: "Noto Serif Display", sans-serif;
   --font-source-serif: "Source Serif 4", sans-serif;
-  --font-texturina: Texturina, sans-serif;
+  --font-texturina: "Texturina", sans-serif;
 
   --color-background: var(--backgroundcolor);
   --color-text: var(--textcolor);
